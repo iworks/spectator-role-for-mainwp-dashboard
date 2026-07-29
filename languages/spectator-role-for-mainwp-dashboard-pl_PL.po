@@ -1,0 +1,42 @@
+# Copyright (C) 2026 Marcin Pietrzak
+# This file is distributed under the GPLv3 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.0.1\n"
+"Report-Msgid-Bugs-To: http://iworks.pl\n"
+"POT-Creation-Date: 2026-07-29 09:23:59+00:00\n"
+"PO-Revision-Date: 2026-07-29 11:25+0200\n"
+"Last-Translator: \n"
+"Language-Team: iWorks <support@iworks.pl>\n"
+"Language: pl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;_x:1,2c;_ex:1,2c;_n:1,2;_nx:1,2,4c;_n_noop:1,2;_nx_noop:1,2,3c;esc_attr__;esc_html__;esc_attr_e;esc_html_e;esc_attr_x:1,2c;esc_html_x:1,2c\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-Bookmarks: \n"
+"X-Textdomain-Support: yes\n"
+"X-Generator: Poedit 3.9\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#. Plugin Name of the plugin/theme
+msgid "Spectator Role for MainWP Dashboard"
+msgstr "Rola Obserwatora dla kokpitu MainWP"
+
+#. Plugin URI of the plugin/theme
+msgid "PLUGIN_URI"
+msgstr "PLUGIN_URI"
+
+#. Description of the plugin/theme
+msgid "PLUGIN_TAGLINE"
+msgstr "PLUGIN_TAGLINE"
+
+#. Author of the plugin/theme
+msgid "Marcin Pietrzak"
+msgstr "Marcin Pietrzak"
+
+#. Author URI of the plugin/theme
+msgid "http://iworks.pl/"
+msgstr ""
