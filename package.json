@@ -1,0 +1,56 @@
+{
+    "name": "spectator-role-for-mainwp-dashboard",
+    "title": "Spectator Role for MainWP Dashboard",
+    "tagline": "Safe, Read-Only Dashboard Access for Clients & Teams for MainWP Dashboard",
+    "description": "Want to show your clients or team members how their websites are performing without worrying about accidental updates or setting changes? MainWP Spectator introduces a dedicated \"Spectator\" role to your self-hosted MainWP Dashboard, giving selected users secure, read-only access.",
+    "version": "0.0.1",
+    "homepage": "http://iworks.pl/iw_plugin/spectator-role-for-mainwp-dashboard/",
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:iworks/spectator-role-for-mainwp-dashboard.git",
+        "website": "https://github.com/iworks/spectator-role-for-mainwp-dashboard"
+    },
+    "author": "iworks",
+    "tags": [
+    ],
+    "contributors": [
+        {
+            "name": "Marcin Pietrzak",
+            "email": "marcin@iworks.pl",
+            "uri": "http://iworks.pl/"
+        }
+    ],
+    "translator": {
+        "name": "Marcin Pietrzak",
+        "email": "marcin@iworks.pl"
+    },
+    "requires": {
+        "WordPress": "6.0",
+        "PHP": "8.1"
+    },
+    "tested": {
+        "WordPress": "7.1"
+    },
+    "devDependencies": {
+        "grunt": "^1",
+        "load-grunt-tasks": "^0",
+        "grunt-checktextdomain": "^1",
+        "grunt-contrib-clean": "^1",
+        "grunt-contrib-compass": "^1",
+        "grunt-contrib-compress": "^1",
+        "grunt-contrib-concat": "^1",
+        "grunt-contrib-copy": "^1",
+        "grunt-contrib-cssmin": "^2",
+        "grunt-contrib-jshint": "^1",
+        "grunt-contrib-nodeunit": "^1",
+        "grunt-contrib-sass": "^1",
+        "grunt-contrib-uglify": "^1",
+        "grunt-contrib-watch": "^1",
+        "grunt-concat-css": "^0",
+        "grunt-phpunit": "^0",
+        "grunt-potomo": "^3",
+        "grunt-replace": "^1",
+        "grunt-wp-i18n": "^1"
+    },
+    "license": "GPL-3.0"
+}
