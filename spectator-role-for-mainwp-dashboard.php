@@ -50,56 +50,6 @@ if ( ! class_exists( 'iworks_spectator_role_for_mainwp_dashboard' ) ) {
 	require_once $spectator_role_for_mainwp_dashboard_vendor . '/iworks/class-spectator-role-for-mainwp-dashboard.php';
 }
 
-/**
- * Load configuration options
- * This file contains all plugin configuration settings
- */
-require_once $spectator_role_for_mainwp_dashboard_base . '/etc/options.php';
-
-/**
- * Load the options class if it doesn't exist
- * This class handles all plugin options and settings
- */
-if ( ! class_exists( 'iworks_options' ) ) {
-	// Load the options class from the includes directory
-	require_once $spectator_role_for_mainwp_dashboard_vendor . '/iworks/options/options.php';
-}
-
-/**
- * Initialize and get plugin options
- * This function creates and returns the options object
- *
- * @return iworks_options The plugin options object
- */
-function iworks_spectator_role_for_mainwp_dashboard_get_options() {
-	// Use global variable to store options object
-	global $iworks_spectator_role_for_mainwp_dashboard_options;
-
-	// Return existing options object if it exists
-	if ( is_object( $iworks_spectator_role_for_mainwp_dashboard_options ) ) {
-		return $iworks_spectator_role_for_mainwp_dashboard_options;
-	}
-
-	// Create new options object if it doesn't exist
-	$iworks_spectator_role_for_mainwp_dashboard_options = new iworks_options();
-
-	// Set the function name for options
-	$iworks_spectator_role_for_mainwp_dashboard_options->set_option_function_name( 'iworks_spectator_role_for_mainwp_dashboard_options' );
-	// Set the option prefix for all plugin options
-	$iworks_spectator_role_for_mainwp_dashboard_options->set_option_prefix( IWORKS_SRMDA_PREFIX );
-
-	// Set the plugin file name if the method exists
-	if ( method_exists( $iworks_spectator_role_for_mainwp_dashboard_options, 'set_plugin' ) ) {
-		$iworks_spectator_role_for_mainwp_dashboard_options->set_plugin( basename( __FILE__ ) );
-	}
-
-	// Initialize the options
-	$iworks_spectator_role_for_mainwp_dashboard_options->options_init();
-
-	// Return the options object
-	return $iworks_spectator_role_for_mainwp_dashboard_options;
-}
-
 // Initialize the main plugin class
 $iworks_spectator_role_for_mainwp_dashboard = new iworks_spectator_role_for_mainwp_dashboard();
 

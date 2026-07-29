@@ -37,7 +37,6 @@ class iworks_spectator_role_for_mainwp_dashboard extends iworks_spectator_role_f
 
 	/**
 	 * Class constructor.
-	 *
 	 * Initializes the plugin by setting up hooks and loading required files.
 	 *
 	 * @since 1.0.0
@@ -50,30 +49,12 @@ class iworks_spectator_role_for_mainwp_dashboard extends iworks_spectator_role_f
 		 */
 		add_action( 'init', array( $this, 'action_init_settings' ) );
 		/**
-		 * post types
-		 */
-		$filename = $this->includes_directory . '/class-iworks-spectator-role-for-mainwp-dashboard-posttypes.php';
-		if ( is_file( $filename ) ) {
-			include_once $filename;
-			new iworks_wordpress_plugin_posttypes();
-		}
-		/**
 		 * load github class
 		 */
 		$filename = $this->includes_directory . '/class-iworks-spectator-role-for-mainwp-dashboard-github.php';
 		if ( is_file( $filename ) ) {
 			include_once $filename;
 			new iworks_spectator_role_for_mainwp_dashboard_github();
-		}
-		/**
-		 * admin
-		 */
-		if ( is_admin() ) {
-			$filename = $this->includes_directory . '/class-iworks-spectator-role-for-mainwp-dashboard-wp-admin.php';
-			if ( is_file( $filename ) ) {
-				include_once $filename;
-				new iworks_spectator_role_for_mainwp_dashboard_wp_admin();
-			}
 		}
 		/**
 		 * is active?
@@ -90,29 +71,18 @@ class iworks_spectator_role_for_mainwp_dashboard extends iworks_spectator_role_f
 	 * @return void
 	 */
 	public function action_init_settings() {
-		/**
-		 * options
-		 */
-		if ( is_admin() ) {
-		} else {
-			$file = 'assets/styles/spectator-role-for-mainwp-dashboard-frontend' . $this->dev . '.css';
-			wp_enqueue_style( 'spectator-role-for-mainwp-dashboard', plugins_url( $file, $this->base ), array(), $this->get_version( $file ) );
-		}
 	}
 
 	/**
 	 * Plugin activation hook.
 	 *
-	 * Handles database installation and option initialization
-	 * when the plugin is activated.
+	 * Handles database installation when the plugin is activated.
 	 *
 	 * @since 1.0.0
 	 * @return void
 	 */
 	public function register_activation_hook() {
 		$this->db_install();
-		$this->check_option_object();
-		$this->options->activate();
 		do_action( 'iworks/spectator-role-for-mainwp-dashboard/register_activation_hook' );
 	}
 
@@ -125,8 +95,6 @@ class iworks_spectator_role_for_mainwp_dashboard extends iworks_spectator_role_f
 	 * @return void
 	 */
 	public function register_deactivation_hook() {
-		$this->check_option_object();
-		$this->options->deactivate();
 		do_action( 'iworks/spectator-role-for-mainwp-dashboard/register_deactivation_hook' );
 	}
 

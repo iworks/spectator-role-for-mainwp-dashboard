@@ -112,16 +112,6 @@ class iworks_spectator_role_for_mainwp_dashboard_base {
 	protected $plugin_file_path;
 
 	/**
-	 * Plugin capability.
-	 *
-	 * Required capability for accessing plugin settings and functionality.
-	 *
-	 * @since 1.0.0
-	 * @var   string $capability Required capability for plugin settings
-	 */
-	private string $capability = 'manage_options';
-
-	/**
 	 * Plugin version.
 	 *
 	 * Current version of the plugin, used for cache busting and updates.
@@ -162,17 +152,6 @@ class iworks_spectator_role_for_mainwp_dashboard_base {
 	 * @var   string $eol End of line character for output
 	 */
 	protected string $eol = '';
-
-	/**
-	 * iWorks Options Class Object.
-	 *
-	 * Instance of the options class for managing plugin settings.
-	 *
-	 * @since 1.0.0
-	 * @var   iworks_options $options Instance of the options class
-	 */
-	protected $options;
-
 
 	/**
 	 * Spectator Role for MainWP Dashboard
@@ -403,22 +382,6 @@ class iworks_spectator_role_for_mainwp_dashboard_base {
 	 */
 	protected function html_title( $text ): void {
 		printf( '<h1 class="wp-heading-inline">%s</h1>', esc_html( $text ) );
-	}
-
-	/**
-	 * Check option object.
-	 *
-	 * Ensures the options object is properly initialized and available.
-	 * Creates a new instance if one doesn't exist.
-	 *
-	 * @since 1.0.0
-	 * @return void
-	 */
-	protected function check_option_object(): void {
-		if ( is_a( $this->options, 'iworks_options' ) ) {
-			return;
-		}
-		$this->options = iworks_spectator_role_for_mainwp_dashboard_get_options();
 	}
 
 	/**
