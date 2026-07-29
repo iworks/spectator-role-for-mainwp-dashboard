@@ -30,24 +30,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly
 
 /**
- * Define static options and constants for the plugin
- */
-// Define plugin version constant
-define( 'IWORKS_SRMDA_VERSION', 'PLUGIN_VERSION' );
-// Define prefix for all plugin options and functions
-define( 'IWORKS_SRMDA_PREFIX', 'iworks_spectator-role-for-mainwp-dashboard_' );
-// Get the base directory path
-$spectator_role_for_mainwp_dashboard_base = __DIR__;
-// Set vendor directory path (where core classes are located)
-$spectator_role_for_mainwp_dashboard_vendor = $spectator_role_for_mainwp_dashboard_base . '/includes';
-
-/**
  * Load the main plugin class if it doesn't exist
  * This is the core class that handles all plugin functionality
  */
 if ( ! class_exists( 'iworks_spectator_role_for_mainwp_dashboard' ) ) {
 	// Load the main plugin class from the includes directory
-	require_once $spectator_role_for_mainwp_dashboard_vendor . '/iworks/class-spectator-role-for-mainwp-dashboard.php';
+	require_once __DIR__ . '/includes/iworks/class-spectator-role-for-mainwp-dashboard.php';
 }
 
 // Initialize the main plugin class

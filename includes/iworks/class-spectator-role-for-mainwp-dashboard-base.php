@@ -156,7 +156,23 @@ class iworks_spectator_role_for_mainwp_dashboard_base {
 	/**
 	 * Spectator Role for MainWP Dashboard
 	 */
-	protected $spectator_role_name = 'spectator';
+	protected $spectator_role_name = 'mainwp_spectator';
+
+	/**
+	 * Check if current user has spectator role.
+	 *
+	 * Determines whether the currently logged-in user has the spectator role.
+	 *
+	 * @since 1.0.0
+	 * @return bool True if user has spectator role, false otherwise.
+	 */
+	public function is_spectator(): bool {
+		if ( ! is_user_logged_in() ) {
+			return false;
+		}
+		$user = wp_get_current_user();
+		return in_array( $this->spectator_role_name, (array) $user->roles, true );
+	}
 
 
 	/**
@@ -458,5 +474,16 @@ class iworks_spectator_role_for_mainwp_dashboard_base {
 				SimpleLogger()->notice( $message, $data );
 				break;
 		}
+	}
+
+	/**
+	 * Check if current user has spectator role.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool True if current user has spectator role, false otherwise.
+	 */
+	protected function is_current_user_spectator() {
+		return in_array( $this->spectator_role_name, wp_get_current_user()->roles );
 	}
 }
