@@ -65,10 +65,10 @@ class iworks_spectator_role_for_mainwp_dashboard extends iworks_spectator_role_f
 		/**
 		 * MainWP Dashboard integration
 		 */
-		$filename = $this->includes_directory . '/class-iworks-spectator-role-for-mainwp-dashboard-mainwp.php';
+		$filename = $this->includes_directory . '/class-iworks-spectator-role-for-mainwp-dashboard-admin.php';
 		if ( is_file( $filename ) ) {
 			include_once $filename;
-			new iworks_spectator_role_for_mainwp_dashboard_mainwp();
+			new iworks_spectator_role_for_mainwp_dashboard_admin();
 		}
 	}
 
@@ -96,7 +96,10 @@ class iworks_spectator_role_for_mainwp_dashboard extends iworks_spectator_role_f
 		$role_name = $this->spectator_role_name;
 
 		// Check if role already exists to avoid overwriting
-		if ( get_role( $role_name ) ) {
+		$spectator_role = get_role( $this->spectator_role_name );
+		if ( $spectator_role ) {
+			// Grant read capability to spectator role
+			$spectator_role->add_cap( 'read' );
 			return;
 		}
 
@@ -124,6 +127,7 @@ class iworks_spectator_role_for_mainwp_dashboard extends iworks_spectator_role_f
 	public function register_activation_hook() {
 		$this->db_install();
 		do_action( 'iworks/spectator-role-for-mainwp-dashboard/register_activation_hook' );
+		add_action( 'admin_menu', array( $this, 'register_admin_menu' ) );
 	}
 
 	/**
@@ -162,5 +166,8 @@ class iworks_spectator_role_for_mainwp_dashboard extends iworks_spectator_role_f
 		if ( $user && in_array( $this->spectator_role_name, $user->roles ) ) {
 			$user->add_role( 'administrator' );
 		}
+	}
+
+	public function grant_roles() {
 	}
 }
