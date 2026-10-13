@@ -32,8 +32,8 @@ class iworks_spectator_role_for_mainwp_dashboard_admin extends iworks_spectator_
 
 	public function action_admin_menu_register_admin_menu() {
 			add_menu_page(
-				__( 'Sites', 'PLUGIN_TEXTDOMAIN' ),          // Page title
-				__( 'Sites', 'PLUGIN_TEXTDOMAIN' ),                 // Menu title
+				__( 'Sites', 'spectator-role-for-mainwp-dashboard' ),          // Page title
+				__( 'Sites', 'spectator-role-for-mainwp-dashboard' ),                 // Menu title
 				$this->spectator_role_name,                            // Capability required
 				'mainwp-custom-sites-list',                  // Menu slug
 				array( $this, 'render_sites_list_page' ),    // Callback method pointing to this instance
@@ -42,8 +42,8 @@ class iworks_spectator_role_for_mainwp_dashboard_admin extends iworks_spectator_
 			);
 			add_submenu_page(
 				'mainwp-custom-sites-list',                  // Parent slug
-				__( 'Plugins', 'PLUGIN_TEXTDOMAIN' ),        // Page title
-				__( 'Plugins', 'PLUGIN_TEXTDOMAIN' ),        // Menu title
+				__( 'Plugins', 'spectator-role-for-mainwp-dashboard' ),        // Page title
+				__( 'Plugins', 'spectator-role-for-mainwp-dashboard' ),        // Menu title
 				$this->spectator_role_name,                  // Capability required
 				'mainwp-custom-plugins-list',                // Menu slug
 				array( $this, 'render_plugins_list_page' ), // Callback method
@@ -60,13 +60,13 @@ class iworks_spectator_role_for_mainwp_dashboard_admin extends iworks_spectator_
 		$sites = $wpdb->get_results( "SELECT * FROM {$table_name} ORDER BY name ASC" );
 
 		echo '<div class="wrap">';
-		echo '<h1>' . esc_html__( 'MainWP Child Sites', 'textdomain' ) . '</h1>';
+		echo '<h1>' . esc_html__( 'MainWP Child Sites', 'spectator-role-for-mainwp-dashboard' ) . '</h1>';
 		echo '<table class="wp-list-table widefat fixed striped pages">';
 		echo '<thead>';
 		echo '<tr>';
-		echo '<th scope="col" class="manage-column">' . esc_html__( 'Site Name', 'textdomain' ) . '</th>';
-		echo '<th scope="col" class="manage-column">' . esc_html__( 'URL', 'textdomain' ) . '</th>';
-		echo '<th scope="col" class="manage-column" style="width: 150px;">' . esc_html__( 'Actions', 'textdomain' ) . '</th>';
+		echo '<th scope="col" class="manage-column">' . esc_html__( 'Site Name', 'spectator-role-for-mainwp-dashboard' ) . '</th>';
+		echo '<th scope="col" class="manage-column">' . esc_html__( 'URL', 'spectator-role-for-mainwp-dashboard' ) . '</th>';
+		echo '<th scope="col" class="manage-column" style="width: 150px;">' . esc_html__( 'Actions', 'spectator-role-for-mainwp-dashboard' ) . '</th>';
 		echo '</tr>';
 		echo '</thead>';
 		echo '<tbody>';
@@ -81,12 +81,12 @@ class iworks_spectator_role_for_mainwp_dashboard_admin extends iworks_spectator_
 				echo '<tr>';
 				echo '<td><strong>' . esc_html( $site_obj->name ) . '</strong></td>';
 				echo '<td><a href="' . esc_url( $site_obj->url ) . '" target="_blank">' . esc_html( $site_obj->url ) . '</a></td>';
-				echo '<td><a class="button button-secondary" href="' . esc_url( $admin_url ) . '" target="_blank">' . esc_html__( 'Go to Admin', 'textdomain' ) . '</a></td>';
+				echo '<td><a class="button button-secondary" href="' . esc_url( $admin_url ) . '" target="_blank">' . esc_html__( 'Go to Admin', 'spectator-role-for-mainwp-dashboard' ) . '</a></td>';
 				echo '</tr>';
 			}
 		} else {
 			$connect_url = admin_url( 'admin.php?page=managesites' );
-			echo '<tr><td colspan="3">' . sprintf( __( 'No child sites found. Connect them via <a href="%s">MainWP</a>.', 'textdomain' ), esc_url( $connect_url ) ) . '</td></tr>';
+			echo '<tr><td colspan="3">' . sprintf( __( 'No child sites found. Connect them via <a href="%s">MainWP</a>.', 'spectator-role-for-mainwp-dashboard' ), esc_url( $connect_url ) ) . '</td></tr>';
 		}
 
 		echo '</tbody>';
@@ -130,16 +130,16 @@ class iworks_spectator_role_for_mainwp_dashboard_admin extends iworks_spectator_
 		asort( $plugins );
 
 		echo '<div class="wrap">';
-		echo '<h1>' . esc_html__( 'MainWP Installed Plugins', 'textdomain' ) . '</h1>';
+		echo '<h1>' . esc_html__( 'MainWP Installed Plugins', 'spectator-role-for-mainwp-dashboard' ) . '</h1>';
 		echo '<table class="wp-list-table widefat fixed striped pages">';
 		echo '<thead>';
 		echo '<tr>';
-		echo '<th scope="col" class="manage-column">' . esc_html__( 'Name', 'textdomain' ) . '</th>';
-		echo '<th scope="col" class="manage-column">' . esc_html__( 'MU', 'textdomain' ) . '</th>';
-		echo '<th scope="col" class="manage-column">' . esc_html__( 'Versions', 'textdomain' ) . '</th>';
-		echo '<th scope="col" class="manage-column">' . esc_html__( 'Sites', 'textdomain' ) . '</th>';
-		echo '<th scope="col" class="manage-column">' . esc_html__( 'Sites Count', 'textdomain' ) . '</th>';
-		//      echo '<th scope="col" class="manage-column">' . esc_html__( 'Description', 'textdomain' ) . '</th>';
+		echo '<th scope="col" class="manage-column">' . esc_html__( 'Name', 'spectator-role-for-mainwp-dashboard' ) . '</th>';
+		echo '<th scope="col" class="manage-column">' . esc_html__( 'MU', 'spectator-role-for-mainwp-dashboard' ) . '</th>';
+		echo '<th scope="col" class="manage-column">' . esc_html__( 'Versions', 'spectator-role-for-mainwp-dashboard' ) . '</th>';
+		echo '<th scope="col" class="manage-column">' . esc_html__( 'Sites', 'spectator-role-for-mainwp-dashboard' ) . '</th>';
+		echo '<th scope="col" class="manage-column">' . esc_html__( 'Sites Count', 'spectator-role-for-mainwp-dashboard' ) . '</th>';
+		//      echo '<th scope="col" class="manage-column">' . esc_html__( 'Description', 'spectator-role-for-mainwp-dashboard' ) . '</th>';
 		echo '</tr>';
 		echo '</thead>';
 		echo '<tbody>';
@@ -156,7 +156,7 @@ class iworks_spectator_role_for_mainwp_dashboard_admin extends iworks_spectator_
 				echo '</tr>';
 			}
 		} else {
-			echo '<tr><td colspan="4">' . esc_html__( 'No plugins found.', 'textdomain' ) . '</td></tr>';
+			echo '<tr><td colspan="4">' . esc_html__( 'No plugins found.', 'spectator-role-for-mainwp-dashboard' ) . '</td></tr>';
 		}
 
 		echo '</tbody>';

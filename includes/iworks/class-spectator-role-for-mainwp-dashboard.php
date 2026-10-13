@@ -111,7 +111,7 @@ class iworks_spectator_role_for_mainwp_dashboard extends iworks_spectator_role_f
 		// Add the role
 		add_role(
 			$role_name,
-			esc_html__( 'Spectator (MainWP)', 'PLUGIN_TEXTDOMAIN' ),
+			esc_html__( 'Spectator (MainWP)', 'spectator-role-for-mainwp-dashboard' ),
 			$capabilities
 		);
 	}
