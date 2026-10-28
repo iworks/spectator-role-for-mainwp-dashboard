@@ -109,7 +109,8 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 	/**
 	 * Prepare sites for display.
 	 *
-	 * Handles search, sorting, and pagination for the MainWP child sites query.
+	 * Handles search, tag filtering, sorting, and pagination for the
+	 * MainWP child sites query.
 	 *
 	 * @since 1.0.0
 	 * @return void
@@ -117,7 +118,8 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 	public function prepare_items() {
 		global $wpdb;
 
-		$table_name = $wpdb->prefix . 'mainwp_wp';
+		$table_name  = $wpdb->prefix . 'mainwp_wp';
+		$group_table = $wpdb->prefix . 'mainwp_wp_group';
 
 		/**
 		 * Search - placeholders only; LIKE values are bound in a single
@@ -126,11 +128,22 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 		$where_sql = '';
 		$args      = array();
 		$search    = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : '';
+		$tag_id    = $this->get_current_tag_id();
+
 		if ( '' !== $search ) {
-			$like       = '%' . $wpdb->esc_like( $search ) . '%';
-			$where_sql  = ' WHERE name LIKE %s OR url LIKE %s ';
-			$args[]     = $like;
-			$args[]     = $like;
+			$like      = '%' . $wpdb->esc_like( $search ) . '%';
+			$where_sql = ' WHERE ( w.name LIKE %s OR w.url LIKE %s ) ';
+			$args[]    = $like;
+			$args[]    = $like;
+		}
+
+		/**
+		 * Tag filter - EXISTS avoids duplicate rows for sites in multiple tags.
+		 */
+		if ( 0 < $tag_id ) {
+			$where_sql .= ( '' === $where_sql ) ? ' WHERE ' : ' AND ';
+			$where_sql .= "EXISTS ( SELECT 1 FROM {$group_table} wg WHERE wg.wpid = w.id AND wg.groupid = %d ) ";
+			$args[]    = $tag_id;
 		}
 
 		/**
@@ -152,7 +165,7 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 		$offset       = ( $current_page - 1 ) * $this->per_page;
 
 		$total_items = (int) $wpdb->get_var(
-			$wpdb->prepare( "SELECT COUNT(*) FROM {$table_name}{$where_sql}", ...$args )
+			$wpdb->prepare( "SELECT COUNT(*) FROM {$table_name} w{$where_sql}", ...$args )
 		);
 
 		$args[] = $this->per_page;
@@ -160,7 +173,7 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 
 		$this->items = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT * FROM {$table_name}{$where_sql} ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d",
+				"SELECT w.* FROM {$table_name} w{$where_sql} ORDER BY w.{$orderby} {$order} LIMIT %d OFFSET %d",
 				...$args
 			)
 		);
@@ -175,6 +188,79 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 				'total_pages' => (int) ceil( $total_items / $this->per_page ),
 			)
 		);
+	}
+
+	/**
+	 * Get the currently requested tag ID.
+	 *
+	 * @since 1.0.0
+	 * @return int Tag ID, or 0 when no tag filter is active.
+	 */
+	public function get_current_tag_id() {
+		return isset( $_REQUEST['tag'] ) ? absint( $_REQUEST['tag'] ) : 0;
+	}
+
+	/**
+	 * Get tags with at least one connected site.
+	 *
+	 * Empty tags are excluded by the INNER JOIN.
+	 *
+	 * @since 1.0.0
+	 * @return array Array of objects with id, name, and num properties.
+	 */
+	private function get_tags_with_counts() {
+		global $wpdb;
+
+		return (array) $wpdb->get_results(
+			"SELECT g.id, g.name, COUNT( wg.wpid ) AS num
+			FROM {$wpdb->prefix}mainwp_group g
+			INNER JOIN {$wpdb->prefix}mainwp_wp_group wg ON wg.groupid = g.id
+			GROUP BY g.id, g.name
+			ORDER BY g.name ASC"
+		);
+	}
+
+	/**
+	 * Get the available views (tags) for the table.
+	 *
+	 * Renders tag links above the table, similar to post statuses.
+	 *
+	 * @since 1.0.0
+	 * @return array Views in the format class => HTML.
+	 */
+	public function get_views() {
+		$base_url = admin_url( 'admin.php?page=mainwp-custom-sites-list' );
+		$search   = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : '';
+		$tag_id   = $this->get_current_tag_id();
+
+		/**
+		 * All sites.
+		 */
+		$all_url = '' !== $search ? add_query_arg( 's', $search, $base_url ) : $base_url;
+		$views   = array(
+			'all' => sprintf(
+				'<a href="%s"%s>%s <span class="count">(%d)</span></a>',
+				esc_url( $all_url ),
+				0 === $tag_id ? ' class="current"' : '',
+				esc_html__( 'All', 'spectator-role-for-mainwp-dashboard' ),
+				(int) $this->get_pagination_arg( 'total_items' )
+			),
+		);
+
+		/**
+		 * Tags with at least one site.
+		 */
+		foreach ( $this->get_tags_with_counts() as $tag ) {
+			$views[ 'tag-' . $tag->id ] = sprintf(
+				'<a href="%s"%s>%s <span class="count">(%d)</span></a>',
+				esc_url( add_query_arg( 'tag', $tag->id, $all_url ) ),
+				$tag_id === (int) $tag->id ? ' class="current"' : '',
+				esc_html( $tag->name ),
+				(int) $tag->num
+			);
+		}
+
+		return $views;
 	}
 
 	/**
