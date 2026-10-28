@@ -50,6 +50,14 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 	private int $per_page = 20;
 
 	/**
+	 * Tags of the sites on the current page, keyed by site ID.
+	 *
+	 * @since 1.0.0
+	 * @var   array $site_tags Map of site ID to array of tag objects (id, name).
+	 */
+	private array $site_tags = array();
+
+	/**
 	 * Constructor.
 	 *
 	 * Configures the list table as a non-AJAX table with singular/plural labels.
@@ -87,9 +95,9 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 	 */
 	public function get_columns() {
 		return array(
-			'name'    => __( 'Site Name', 'spectator-role-for-mainwp-dashboard' ),
-			'url'     => __( 'URL', 'spectator-role-for-mainwp-dashboard' ),
-			'actions' => __( 'Actions', 'spectator-role-for-mainwp-dashboard' ),
+			'name' => __( 'Site Name', 'spectator-role-for-mainwp-dashboard' ),
+			'url'  => __( 'URL', 'spectator-role-for-mainwp-dashboard' ),
+			'tags' => __( 'Tags', 'spectator-role-for-mainwp-dashboard' ),
 		);
 	}
 
@@ -181,6 +189,11 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 			$this->items = array();
 		}
 
+		/**
+		 * Load tags for the sites on the current page.
+		 */
+		$this->load_site_tags();
+
 		$this->set_pagination_args(
 			array(
 				'total_items' => $total_items,
@@ -221,6 +234,46 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 	}
 
 	/**
+	 * Load tags for the sites on the current page.
+	 *
+	 * @since 1.0.0
+	 * @return void
+	 */
+	private function load_site_tags() {
+		global $wpdb;
+
+		if ( empty( $this->items ) ) {
+			return;
+		}
+
+		$ids = array();
+		foreach ( $this->items as $item ) {
+			$ids[] = (int) $item->id;
+		}
+
+		$rows = (array) $wpdb->get_results(
+			$wpdb->prepare(
+				sprintf(
+					"SELECT wg.wpid, g.id, g.name
+					FROM {$wpdb->prefix}mainwp_wp_group wg
+					INNER JOIN {$wpdb->prefix}mainwp_group g ON g.id = wg.groupid
+					WHERE wg.wpid IN ( %s )
+					ORDER BY g.name ASC",
+					implode( ',', array_fill( 0, count( $ids ), '%d' ) )
+				),
+				...$ids
+			)
+		);
+
+		foreach ( $rows as $row ) {
+			$this->site_tags[ (int) $row->wpid ][] = (object) array(
+				'id'   => (int) $row->id,
+				'name' => $row->name,
+			);
+		}
+	}
+
+	/**
 	 * Get the available views (tags) for the table.
 	 *
 	 * Renders tag links above the table, similar to post statuses.
@@ -253,7 +306,7 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 		foreach ( $this->get_tags_with_counts() as $tag ) {
 			$views[ 'tag-' . $tag->id ] = sprintf(
 				'<a href="%s"%s>%s <span class="count">(%d)</span></a>',
-				esc_url( add_query_arg( 'tag', $tag->id, $all_url ) ),
+				esc_url( $this->get_tag_url( $tag->id ) ),
 				$tag_id === (int) $tag->id ? ' class="current"' : '',
 				esc_html( $tag->name ),
 				(int) $tag->num
@@ -261,6 +314,25 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 		}
 
 		return $views;
+	}
+
+	/**
+	 * Build the URL that filters the table by a tag.
+	 *
+	 * Preserves an active search term.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $tag_id Tag ID.
+	 * @return string Filter URL.
+	 */
+	private function get_tag_url( $tag_id ) {
+		$url    = admin_url( 'admin.php?page=mainwp-custom-sites-list' );
+		$search = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : '';
+		if ( '' !== $search ) {
+			$url = add_query_arg( 's', $search, $url );
+		}
+		return add_query_arg( 'tag', $tag_id, $url );
 	}
 
 	/**
@@ -292,22 +364,55 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 	}
 
 	/**
-	 * Render the actions column.
+	 * Add row actions to the primary column.
 	 *
 	 * Provides a MainWP direct auto-login link for the site.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param object $item        Site row.
+	 * @param string $column_name Current column name.
+	 * @param string $primary     Primary column name.
+	 * @return string Row actions HTML, or empty string.
+	 */
+	protected function handle_row_actions( $item, $column_name, $primary ) {
+		if ( 'name' !== $column_name ) {
+			return '';
+		}
+		$admin_url = admin_url( 'admin.php?page=SiteOpen&id=' . $item->id );
+		$actions   = array(
+			'go-to-admin' => sprintf(
+				'<a href="%s" target="_blank" rel="noopener">%s</a>',
+				esc_url( $admin_url ),
+				esc_html__( 'Go to Admin', 'spectator-role-for-mainwp-dashboard' )
+			),
+		);
+		return $this->row_actions( $actions );
+	}
+
+	/**
+	 * Render the tags column.
+	 *
+	 * Displays tags as links that filter the table by tag.
 	 *
 	 * @since 1.0.0
 	 *
 	 * @param object $item Site row.
 	 * @return string Column HTML.
 	 */
-	public function column_actions( $item ) {
-		$admin_url = admin_url( 'admin.php?page=SiteOpen&id=' . $item->id );
-		return sprintf(
-			'<a class="button button-secondary" href="%s" target="_blank" rel="noopener">%s</a>',
-			esc_url( $admin_url ),
-			esc_html__( 'Go to Admin', 'spectator-role-for-mainwp-dashboard' )
-		);
+	public function column_tags( $item ) {
+		if ( empty( $this->site_tags[ (int) $item->id ] ) ) {
+			return '&mdash;';
+		}
+		$links = array();
+		foreach ( $this->site_tags[ (int) $item->id ] as $tag ) {
+			$links[] = sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( $this->get_tag_url( $tag->id ) ),
+				esc_html( $tag->name )
+			);
+		}
+		return implode( ', ', $links );
 	}
 
 	/**
