@@ -50,6 +50,10 @@ class iworks_spectator_role_for_mainwp_dashboard_admin extends iworks_spectator_
 		if ( is_file( $filename ) ) {
 			include_once $filename;
 		}
+		$filename = $this->includes_directory . '/class-iworks-spectator-role-for-mainwp-dashboard-plugins-table.php';
+		if ( is_file( $filename ) ) {
+			include_once $filename;
+		}
 		add_action( 'admin_menu', array( $this, 'action_admin_menu_register_admin_menu' ) );
 		add_action( 'admin_init', array( $this, 'action_admin_init_maybe_export_csv' ) );
 	}
@@ -57,7 +61,7 @@ class iworks_spectator_role_for_mainwp_dashboard_admin extends iworks_spectator_
 	/**
 	 * Handle the CSV export request on admin init.
 	 *
-	 * Delegates to the sites table class.
+	 * Delegates to the sites and plugins list tables.
 	 *
 	 * @since 1.0.0
 	 * @return void
@@ -65,6 +69,8 @@ class iworks_spectator_role_for_mainwp_dashboard_admin extends iworks_spectator_
 	public function action_admin_init_maybe_export_csv() {
 		$sites_table = new iworks_spectator_role_for_mainwp_dashboard_sites_table();
 		$sites_table->maybe_handle_export_csv();
+		$plugins_table = new iworks_spectator_role_for_mainwp_dashboard_plugins_table();
+		$plugins_table->maybe_handle_export_csv();
 	}
 
 	/**
@@ -140,102 +146,33 @@ class iworks_spectator_role_for_mainwp_dashboard_admin extends iworks_spectator_
 	 * Render plugins list page.
 	 *
 	 * Displays a table of all installed plugins across MainWP child sites,
-	 * grouped by plugin name with version and site information.
+	 * grouped by plugin name with version and site information, powered by
+	 * WP_List_Table with pagination, search, MU views, and CSV export.
 	 *
 	 * @since 1.0.0
 	 * @return void
 	 */
 	public function render_plugins_list_page() {
-		global $wpdb;
-		$table_name   = $wpdb->prefix . 'mainwp_wp';
-		$plugins_data = $wpdb->get_results( "SELECT name, url, plugins FROM {$table_name}" );
-		$plugins      = array();
-		foreach ( $plugins_data as $plugin_data ) {
-			$site_plugins = json_decode( $plugin_data->plugins, true );
-			foreach ( $site_plugins as $site_plugin ) {
-				if ( ! isset( $plugins[ $site_plugin['name'] ] ) ) {
-					$plugins[ $site_plugin['name'] ]             = $site_plugin;
-					$plugins[ $site_plugin['name'] ]['sites']    = array();
-					$plugins[ $site_plugin['name'] ]['versions'] = array();
-
-				}
-				/*
-				 * sites
-				 */
-				$plugins[ $site_plugin['name'] ]['sites'][ $plugin_data->url ] = $plugin_data->name;
-				/*
-				 * versions
-				 */
-				if ( ! isset( $plugins[ $site_plugin['name'] ]['versions'][ $site_plugin['version'] ] ) ) {
-					$plugins[ $site_plugin['name'] ]['versions'][ $site_plugin['version'] ] = array();
-				}
-				$plugins[ $site_plugin['name'] ]['versions'][ $site_plugin['version'] ]['sites'][] = $plugin_data->url;
-			}
-		}
-
-		asort( $plugins );
-
+		$plugins_table = new iworks_spectator_role_for_mainwp_dashboard_plugins_table();
+		$plugins_table->prepare_items();
 		echo '<div class="wrap">';
-		echo '<h1>' . esc_html__( 'MainWP Installed Plugins', 'spectator-role-for-mainwp-dashboard' ) . '</h1>';
-		echo '<table class="wp-list-table widefat fixed striped pages">';
-		echo '<thead>';
-		echo '<tr>';
-		echo '<th scope="col" class="manage-column">' . esc_html__( 'Name', 'spectator-role-for-mainwp-dashboard' ) . '</th>';
-		echo '<th scope="col" class="manage-column">' . esc_html__( 'MU', 'spectator-role-for-mainwp-dashboard' ) . '</th>';
-		echo '<th scope="col" class="manage-column">' . esc_html__( 'Versions', 'spectator-role-for-mainwp-dashboard' ) . '</th>';
-		echo '<th scope="col" class="manage-column">' . esc_html__( 'Sites', 'spectator-role-for-mainwp-dashboard' ) . '</th>';
-		echo '<th scope="col" class="manage-column">' . esc_html__( 'Sites Count', 'spectator-role-for-mainwp-dashboard' ) . '</th>';
-		echo '</tr>';
-		echo '</thead>';
-		echo '<tbody>';
-
-		if ( ! empty( $plugins ) ) {
-			foreach ( $plugins as $plugin_name => $plugin ) {
-				echo '<tr id="plugin-' . esc_attr( dirname( $plugin['slug'] ) ) . '">';
-				echo '<td><strong>' . esc_html( $plugin_name ) . '</strong></td>';
-				echo '<td>' . ( isset( $plugin['mu'] ) && $plugin['mu'] ? esc_html__( 'Yes', 'spectator-role-for-mainwp-dashboard' ) : '&mdash;' ) . '</td>';
-				echo '<td><strong>' . esc_html( implode( ', ', array_keys( $plugin['versions'] ) ) ) . '</strong></td>';
-				echo '<td>';
-				echo $this->get_sites_list( $plugin );
-				echo '</td>';
-				echo '<td>' . count( $plugin['sites'] ) . '</td>';
-				echo '</tr>';
-			}
-		} else {
-			echo '<tr><td colspan="4">' . esc_html__( 'No plugins found.', 'spectator-role-for-mainwp-dashboard' ) . '</td></tr>';
+		printf(
+			'<h1 class="wp-heading-inline">%s</h1><a href="%s" class="page-title-action">%s</a><hr class="wp-header-end" />',
+			esc_html__( 'MainWP Installed Plugins', 'spectator-role-for-mainwp-dashboard' ),
+			esc_url( $plugins_table->get_export_url() ),
+			esc_html__( 'Export CSV', 'spectator-role-for-mainwp-dashboard' )
+		);
+		$plugins_table->views();
+		echo '<form method="get">';
+		echo '<input type="hidden" name="page" value="mainwp-custom-plugins-list" />';
+		$mu = $plugins_table->get_current_mu();
+		if ( 'all' !== $mu ) {
+			printf( '<input type="hidden" name="mu" value="%s" />', esc_attr( $mu ) );
 		}
-
-		echo '</tbody>';
-		echo '</table>';
+		$plugins_table->search_box( __( 'Search plugins', 'spectator-role-for-mainwp-dashboard' ), 'mainwp-custom-plugins-list' );
+		$plugins_table->display();
+		echo '</form>';
 		echo '</div>';
-	}
-
-	/**
-	 * Get sites list as HTML for plugins.
-	 *
-	 * Generates an HTML list of sites where a plugin is installed,
-	 * grouped by version if multiple versions exist.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param array $plugin Plugin data array containing sites and versions.
-	 * @return string HTML list of sites with links.
-	 */
-	private function get_sites_list( $plugin ) {
-		$output = '';
-		foreach ( $plugin['versions'] as $version => $data ) {
-			if ( 1 < count( $plugin['versions'] ) ) {
-				$output .= '<strong>' . esc_html( $version ) . '</strong>';
-			}
-			$output .= '<ul>';
-			foreach ( $data['sites'] as $site_url ) {
-				$output .= '<li>';
-				$output .= '<a href="' . esc_url( $site_url ) . '/wp-admin/" target="_blank">' . esc_html( $plugin['sites'][ $site_url ] ) . '</a>';
-				$output .= '</li>';
-			}
-			$output .= '</ul>';
-		}
-		return $output;
 	}
 
 	/**
