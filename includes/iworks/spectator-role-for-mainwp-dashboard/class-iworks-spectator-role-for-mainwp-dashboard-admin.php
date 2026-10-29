@@ -51,6 +51,20 @@ class iworks_spectator_role_for_mainwp_dashboard_admin extends iworks_spectator_
 			include_once $filename;
 		}
 		add_action( 'admin_menu', array( $this, 'action_admin_menu_register_admin_menu' ) );
+		add_action( 'admin_init', array( $this, 'action_admin_init_maybe_export_csv' ) );
+	}
+
+	/**
+	 * Handle the CSV export request on admin init.
+	 *
+	 * Delegates to the sites table class.
+	 *
+	 * @since 1.0.0
+	 * @return void
+	 */
+	public function action_admin_init_maybe_export_csv() {
+		$sites_table = new iworks_spectator_role_for_mainwp_dashboard_sites_table();
+		$sites_table->maybe_handle_export_csv();
 	}
 
 	/**
@@ -112,6 +126,11 @@ class iworks_spectator_role_for_mainwp_dashboard_admin extends iworks_spectator_
 			printf( '<input type="hidden" name="tag" value="%d" />', $tag_id );
 		}
 		$sites_table->search_box( __( 'Search sites', 'spectator-role-for-mainwp-dashboard' ), 'mainwp-custom-sites-list' );
+		printf(
+			'<a href="%s" class="button">%s</a>',
+			esc_url( $sites_table->get_export_url() ),
+			esc_html__( 'Export CSV', 'spectator-role-for-mainwp-dashboard' )
+		);
 		$sites_table->display();
 		echo '</form>';
 		echo '</div>';

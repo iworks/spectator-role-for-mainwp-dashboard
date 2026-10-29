@@ -126,33 +126,12 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 	public function prepare_items() {
 		global $wpdb;
 
-		$table_name  = $wpdb->prefix . 'mainwp_wp';
-		$group_table = $wpdb->prefix . 'mainwp_wp_group';
+		$table_name = $wpdb->prefix . 'mainwp_wp';
 
 		/**
-		 * Search - placeholders only; LIKE values are bound in a single
-		 * prepare() call per query so the wildcards are never re-parsed.
+		 * Filters - shared with CSV export.
 		 */
-		$where_sql = '';
-		$args      = array();
-		$search    = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : '';
-		$tag_id    = $this->get_current_tag_id();
-
-		if ( '' !== $search ) {
-			$like      = '%' . $wpdb->esc_like( $search ) . '%';
-			$where_sql = ' WHERE ( w.name LIKE %s OR w.url LIKE %s ) ';
-			$args[]    = $like;
-			$args[]    = $like;
-		}
-
-		/**
-		 * Tag filter - EXISTS avoids duplicate rows for sites in multiple tags.
-		 */
-		if ( 0 < $tag_id ) {
-			$where_sql .= ( '' === $where_sql ) ? ' WHERE ' : ' AND ';
-			$where_sql .= "EXISTS ( SELECT 1 FROM {$group_table} wg WHERE wg.wpid = w.id AND wg.groupid = %d ) ";
-			$args[]    = $tag_id;
-		}
+		list( $where_sql, $args ) = $this->get_filter_sql();
 
 		/**
 		 * Sorting - whitelisted to prevent SQL injection.
@@ -211,6 +190,126 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 	 */
 	public function get_current_tag_id() {
 		return isset( $_REQUEST['tag'] ) ? absint( $_REQUEST['tag'] ) : 0;
+	}
+
+	/**
+	 * Build the WHERE clause for the current filters.
+	 *
+	 * Handles the search term and the tag filter. Shared by the list
+	 * table query and the CSV export so both always stay in sync.
+	 *
+	 * @since 1.0.0
+	 * @return array Array of [ where_sql, args ].
+	 */
+	private function get_filter_sql() {
+		global $wpdb;
+
+		$table_name  = $wpdb->prefix . 'mainwp_wp';
+		$group_table = $wpdb->prefix . 'mainwp_wp_group';
+
+		/**
+		 * Search - placeholders only; LIKE values are bound in a single
+		 * prepare() call per query so the wildcards are never re-parsed.
+		 */
+		$where_sql = '';
+		$args      = array();
+		$search    = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : '';
+		$tag_id    = $this->get_current_tag_id();
+
+		if ( '' !== $search ) {
+			$like      = '%' . $wpdb->esc_like( $search ) . '%';
+			$where_sql = ' WHERE ( w.name LIKE %s OR w.url LIKE %s ) ';
+			$args[]    = $like;
+			$args[]    = $like;
+		}
+
+		/**
+		 * Tag filter - EXISTS avoids duplicate rows for sites in multiple tags.
+		 */
+		if ( 0 < $tag_id ) {
+			$where_sql .= ( '' === $where_sql ) ? ' WHERE ' : ' AND ';
+			$where_sql .= "EXISTS ( SELECT 1 FROM {$group_table} wg WHERE wg.wpid = w.id AND wg.groupid = %d ) ";
+			$args[]    = $tag_id;
+		}
+
+		return array( $where_sql, $args );
+	}
+
+	/**
+	 * Build the "Export CSV" URL preserving current filters.
+	 *
+	 * Keeps the active search term and tag filter, and adds a nonce.
+	 *
+	 * @since 1.0.0
+	 * @return string Export URL.
+	 */
+	public function get_export_url() {
+		$url = admin_url( 'admin.php?page=mainwp-custom-sites-list&action=export_csv' );
+		$tag_id = $this->get_current_tag_id();
+		if ( 0 < $tag_id ) {
+			$url = add_query_arg( 'tag', $tag_id, $url );
+		}
+		$search = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : '';
+		if ( '' !== $search ) {
+			$url = add_query_arg( 's', $search, $url );
+		}
+		return wp_nonce_url( $url, 'iworks_export_sites_csv' );
+	}
+
+	/**
+	 * Handle the CSV export request.
+	 *
+	 * Triggered by the "Export CSV" button on the sites list page.
+	 * Exports all sites matching the current filters (search + tag),
+	 * with no pagination limit, as: site name, site url.
+	 *
+	 * @since 1.0.0
+	 * @return void
+	 */
+	public function maybe_handle_export_csv() {
+		if ( ! isset( $_REQUEST['page'] ) || 'mainwp-custom-sites-list' !== $_REQUEST['page'] ) {
+			return;
+		}
+		if ( ! isset( $_REQUEST['action'] ) || 'export_csv' !== $_REQUEST['action'] ) {
+			return;
+		}
+		check_admin_referer( 'iworks_export_sites_csv' );
+
+		global $wpdb;
+
+		$table_name = $wpdb->prefix . 'mainwp_wp';
+
+		list( $where_sql, $args ) = $this->get_filter_sql();
+
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT w.name, w.url FROM {$table_name} w{$where_sql} ORDER BY w.name ASC",
+				...$args
+			)
+		);
+		if ( ! is_array( $rows ) ) {
+			$rows = array();
+		}
+
+		$filename = sprintf( 'mainwp-sites-%s.csv', gmdate( 'Y-m-d' ) );
+
+		nocache_headers();
+		header( 'Content-Type: text/csv; charset=utf-8' );
+		header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+
+		// UTF-8 BOM so Excel displays non-ASCII site names correctly.
+		echo "\xEF\xBB\xBF";
+
+		$handle = fopen( 'php://output', 'w' );
+		fputcsv( $handle, array(
+			__( 'Site Name', 'spectator-role-for-mainwp-dashboard' ),
+			__( 'URL', 'spectator-role-for-mainwp-dashboard' ),
+		) );
+		foreach ( $rows as $row ) {
+			fputcsv( $handle, array( $row->name, $row->url ) );
+		}
+		fclose( $handle );
+		exit;
 	}
 
 	/**
