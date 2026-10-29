@@ -54,6 +54,10 @@ class iworks_spectator_role_for_mainwp_dashboard_admin extends iworks_spectator_
 		if ( is_file( $filename ) ) {
 			include_once $filename;
 		}
+		$filename = $this->includes_directory . '/class-iworks-spectator-role-for-mainwp-dashboard-themes-table.php';
+		if ( is_file( $filename ) ) {
+			include_once $filename;
+		}
 		add_action( 'admin_menu', array( $this, 'action_admin_menu_register_admin_menu' ) );
 		add_action( 'admin_init', array( $this, 'action_admin_init_maybe_export_csv' ) );
 	}
@@ -61,7 +65,7 @@ class iworks_spectator_role_for_mainwp_dashboard_admin extends iworks_spectator_
 	/**
 	 * Handle the CSV export request on admin init.
 	 *
-	 * Delegates to the sites and plugins list tables.
+	 * Delegates to the sites, plugins, and themes list tables.
 	 *
 	 * @since 1.0.0
 	 * @return void
@@ -71,6 +75,8 @@ class iworks_spectator_role_for_mainwp_dashboard_admin extends iworks_spectator_
 		$sites_table->maybe_handle_export_csv();
 		$plugins_table = new iworks_spectator_role_for_mainwp_dashboard_plugins_table();
 		$plugins_table->maybe_handle_export_csv();
+		$themes_table = new iworks_spectator_role_for_mainwp_dashboard_themes_table();
+		$themes_table->maybe_handle_export_csv();
 	}
 
 	/**
@@ -179,99 +185,33 @@ class iworks_spectator_role_for_mainwp_dashboard_admin extends iworks_spectator_
 	 * Render themes list page.
 	 *
 	 * Displays a table of all installed themes across MainWP child sites,
-	 * grouped by theme name with version and site information.
+	 * grouped by theme name with version and site information, powered by
+	 * WP_List_Table with pagination, search, status views, and CSV export.
 	 *
 	 * @since 1.0.0
 	 * @return void
 	 */
 	public function render_themes_list_page() {
-		global $wpdb;
-		$table_name  = $wpdb->prefix . 'mainwp_wp';
-		$themes_data = $wpdb->get_results( "SELECT name, url, themes FROM {$table_name}" );
-		$themes      = array();
-		foreach ( $themes_data as $theme_data ) {
-			$site_themes = json_decode( $theme_data->themes, true );
-			foreach ( $site_themes as $site_theme ) {
-				if ( ! isset( $themes[ $site_theme['name'] ] ) ) {
-					$themes[ $site_theme['name'] ]             = $site_theme;
-					$themes[ $site_theme['name'] ]['sites']    = array();
-					$themes[ $site_theme['name'] ]['versions'] = array();
-
-				}
-				/*
-				 * sites
-				 */
-				$themes[ $site_theme['name'] ]['sites'][ $theme_data->url ] = $theme_data->name;
-				/*
-				 * versions
-				 */
-				if ( ! isset( $themes[ $site_theme['name'] ]['versions'][ $site_theme['version'] ] ) ) {
-					$themes[ $site_theme['name'] ]['versions'][ $site_theme['version'] ] = array();
-				}
-				$themes[ $site_theme['name'] ]['versions'][ $site_theme['version'] ]['sites'][] = $theme_data->url;
-			}
-		}
-
-		asort( $themes );
-
+		$themes_table = new iworks_spectator_role_for_mainwp_dashboard_themes_table();
+		$themes_table->prepare_items();
 		echo '<div class="wrap">';
-		echo '<h1>' . esc_html__( 'MainWP Installed Themes', 'spectator-role-for-mainwp-dashboard' ) . '</h1>';
-		echo '<table class="wp-list-table widefat fixed striped pages">';
-		echo '<thead>';
-		echo '<tr>';
-		echo '<th scope="col" class="manage-column">' . esc_html__( 'Name', 'spectator-role-for-mainwp-dashboard' ) . '</th>';
-		echo '<th scope="col" class="manage-column">' . esc_html__( 'Versions', 'spectator-role-for-mainwp-dashboard' ) . '</th>';
-		echo '<th scope="col" class="manage-column">' . esc_html__( 'Sites', 'spectator-role-for-mainwp-dashboard' ) . '</th>';
-		echo '<th scope="col" class="manage-column">' . esc_html__( 'Sites Count', 'spectator-role-for-mainwp-dashboard' ) . '</th>';
-		echo '</tr>';
-		echo '</thead>';
-		echo '<tbody>';
-
-		if ( ! empty( $themes ) ) {
-			foreach ( $themes as $theme_name => $theme ) {
-				echo '<tr id="theme-' . esc_attr( $theme['slug'] ) . '">';
-				echo '<td><strong>' . esc_html( $theme_name ) . '</strong></td>';
-				echo '<td><strong>' . esc_html( implode( ', ', array_keys( $theme['versions'] ) ) ) . '</strong></td>';
-				echo '<td>';
-				echo $this->get_theme_sites_list( $theme );
-				echo '</td>';
-				echo '<td>' . count( $theme['sites'] ) . '</td>';
-				echo '</tr>';
-			}
-		} else {
-			echo '<tr><td colspan="4">' . esc_html__( 'No themes found.', 'spectator-role-for-mainwp-dashboard' ) . '</td></tr>';
+		printf(
+			'<h1 class="wp-heading-inline">%s</h1><a href="%s" class="page-title-action">%s</a><hr class="wp-header-end" />',
+			esc_html__( 'MainWP Installed Themes', 'spectator-role-for-mainwp-dashboard' ),
+			esc_url( $themes_table->get_export_url() ),
+			esc_html__( 'Export CSV', 'spectator-role-for-mainwp-dashboard' )
+		);
+		$themes_table->views();
+		echo '<form method="get">';
+		echo '<input type="hidden" name="page" value="mainwp-custom-themes-list" />';
+		$status = $themes_table->get_current_status();
+		if ( 'all' !== $status ) {
+			printf( '<input type="hidden" name="status" value="%s" />', esc_attr( $status ) );
 		}
-
-		echo '</tbody>';
-		echo '</table>';
+		$themes_table->search_box( __( 'Search themes', 'spectator-role-for-mainwp-dashboard' ), 'mainwp-custom-themes-list' );
+		$themes_table->display();
+		echo '</form>';
 		echo '</div>';
 	}
 
-	/**
-	 * Get sites list as HTML for themes.
-	 *
-	 * Generates an HTML list of sites where a theme is installed,
-	 * grouped by version if multiple versions exist.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param array $theme Theme data array containing sites and versions.
-	 * @return string HTML list of sites with links.
-	 */
-	private function get_theme_sites_list( $theme ) {
-		$output = '';
-		foreach ( $theme['versions'] as $version => $data ) {
-			if ( 1 < count( $theme['versions'] ) ) {
-				$output .= '<strong>' . esc_html( $version ) . '</strong>';
-			}
-			$output .= '<ul>';
-			foreach ( $data['sites'] as $site_url ) {
-				$output .= '<li>';
-				$output .= '<a href="' . esc_url( $site_url ) . '/wp-admin/" target="_blank">' . esc_html( $theme['sites'][ $site_url ] ) . '</a>';
-				$output .= '</li>';
-			}
-			$output .= '</ul>';
-		}
-		return $output;
-	}
 }
