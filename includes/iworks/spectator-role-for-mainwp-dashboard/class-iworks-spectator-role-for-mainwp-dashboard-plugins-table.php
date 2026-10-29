@@ -97,7 +97,7 @@ class iworks_spectator_role_for_mainwp_dashboard_plugins_table extends WP_List_T
 	public function get_columns() {
 		return array(
 			'name'        => __( 'Name', 'spectator-role-for-mainwp-dashboard' ),
-			'mu'          => __( 'MU', 'spectator-role-for-mainwp-dashboard' ),
+			'mu'          => __( 'Type', 'spectator-role-for-mainwp-dashboard' ),
 			'versions'    => __( 'Versions', 'spectator-role-for-mainwp-dashboard' ),
 			'sites'       => __( 'Sites', 'spectator-role-for-mainwp-dashboard' ),
 			'sites_count' => __( 'Sites Count', 'spectator-role-for-mainwp-dashboard' ),
@@ -306,9 +306,7 @@ class iworks_spectator_role_for_mainwp_dashboard_plugins_table extends WP_List_T
 	public function get_views() {
 		$this->load_plugins();
 
-		$base_url = admin_url( 'admin.php?page=mainwp-custom-plugins-list' );
-		$search   = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : '';
-		$current  = $this->get_current_mu();
+		$current = $this->get_current_mu();
 
 		$counts = array(
 			'all'     => count( $this->plugins ),
@@ -325,16 +323,9 @@ class iworks_spectator_role_for_mainwp_dashboard_plugins_table extends WP_List_T
 
 		$views = array();
 		foreach ( $counts as $key => $count ) {
-			$url = $base_url;
-			if ( '' !== $search ) {
-				$url = add_query_arg( 's', $search, $url );
-			}
-			if ( 'all' !== $key ) {
-				$url = add_query_arg( 'mu', $key, $url );
-			}
 			$views[ $key ] = sprintf(
 				'<a href="%s"%s>%s <span class="count">(%d)</span></a>',
-				esc_url( $url ),
+				esc_url( $this->get_view_url( $key ) ),
 				$current === $key ? ' class="current"' : '',
 				esc_html( $this->get_view_label( $key ) ),
 				(int) $count
@@ -360,6 +351,28 @@ class iworks_spectator_role_for_mainwp_dashboard_plugins_table extends WP_List_T
 			default:
 				return __( 'All', 'spectator-role-for-mainwp-dashboard' );
 		}
+	}
+
+	/**
+	 * Build the URL that filters the table by a view.
+	 *
+	 * Preserves an active search term.
+	 *
+	 * @since 1.0.0
+	 * @param string $key View key: 'all', 'regular' or 'mu'.
+	 * @return string Filter URL.
+	 */
+	private function get_view_url( $key ) {
+		$url   = admin_url( 'admin.php?page=mainwp-custom-plugins-list' );
+		$mu    = $this->get_current_mu();
+		$search = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : '';
+		if ( '' !== $search ) {
+			$url = add_query_arg( 's', $search, $url );
+		}
+		if ( 'all' !== $key ) {
+			$url = add_query_arg( 'mu', $key, $url );
+		}
+		return $url;
 	}
 
 	/**
@@ -419,17 +432,18 @@ class iworks_spectator_role_for_mainwp_dashboard_plugins_table extends WP_List_T
 		fputcsv( $handle, array(
 			__( 'Plugin Name', 'spectator-role-for-mainwp-dashboard' ),
 			__( 'Version', 'spectator-role-for-mainwp-dashboard' ),
-			__( 'MU', 'spectator-role-for-mainwp-dashboard' ),
+			__( 'Type', 'spectator-role-for-mainwp-dashboard' ),
 			__( 'Site Name', 'spectator-role-for-mainwp-dashboard' ),
 			__( 'URL', 'spectator-role-for-mainwp-dashboard' ),
 		) );
 		foreach ( $plugins as $plugin ) {
+			$type = $this->get_view_label( ! empty( $plugin['mu'] ) ? 'mu' : 'regular' );
 			foreach ( $plugin['versions'] as $version => $data ) {
 				foreach ( $data['sites'] as $site_url ) {
 					fputcsv( $handle, array(
 						$plugin['name'],
 						$version,
-						! empty( $plugin['mu'] ) ? __( 'Yes', 'spectator-role-for-mainwp-dashboard' ) : 'No',
+						$type,
 						$plugin['sites'][ $site_url ],
 						$site_url,
 					) );
@@ -453,7 +467,10 @@ class iworks_spectator_role_for_mainwp_dashboard_plugins_table extends WP_List_T
 	}
 
 	/**
-	 * Render the MU column.
+	 * Render the type column.
+	 *
+	 * Displays the plugin type as a post-status-style label that
+	 * filters the table by type.
 	 *
 	 * @since 1.0.0
 	 *
@@ -461,10 +478,12 @@ class iworks_spectator_role_for_mainwp_dashboard_plugins_table extends WP_List_T
 	 * @return string Column HTML.
 	 */
 	public function column_mu( $item ) {
-		if ( ! empty( $item['mu'] ) ) {
-			return esc_html__( 'Yes', 'spectator-role-for-mainwp-dashboard' );
-		}
-		return '&mdash;';
+		$key = ! empty( $item['mu'] ) ? 'mu' : 'regular';
+		return sprintf(
+			'<a href="%s"><span class="post-state">%s</span></a>',
+			esc_url( $this->get_view_url( $key ) ),
+			esc_html( $this->get_view_label( $key ) )
+		);
 	}
 
 	/**
