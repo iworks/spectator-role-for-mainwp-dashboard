@@ -117,7 +117,12 @@ class iworks_spectator_role_for_mainwp_dashboard_admin extends iworks_spectator_
 		$sites_table = new iworks_spectator_role_for_mainwp_dashboard_sites_table();
 		$sites_table->prepare_items();
 		echo '<div class="wrap">';
-		echo '<h1>' . esc_html__( 'MainWP Child Sites', 'spectator-role-for-mainwp-dashboard' ) . '</h1>';
+		printf(
+			'<h1 class="wp-heading-inline">%s</h1><a href="%s" class="page-title-action">%s</a><hr class="wp-header-end" />',
+			esc_html__( 'MainWP Child Sites', 'spectator-role-for-mainwp-dashboard' ),
+			esc_url( $sites_table->get_export_url() ),
+			esc_html__( 'Export CSV', 'spectator-role-for-mainwp-dashboard' )
+		);
 		$sites_table->views();
 		echo '<form method="get">';
 		echo '<input type="hidden" name="page" value="mainwp-custom-sites-list" />';
@@ -126,11 +131,6 @@ class iworks_spectator_role_for_mainwp_dashboard_admin extends iworks_spectator_
 			printf( '<input type="hidden" name="tag" value="%d" />', $tag_id );
 		}
 		$sites_table->search_box( __( 'Search sites', 'spectator-role-for-mainwp-dashboard' ), 'mainwp-custom-sites-list' );
-		printf(
-			'<a href="%s" class="button">%s</a>',
-			esc_url( $sites_table->get_export_url() ),
-			esc_html__( 'Export CSV', 'spectator-role-for-mainwp-dashboard' )
-		);
 		$sites_table->display();
 		echo '</form>';
 		echo '</div>';
