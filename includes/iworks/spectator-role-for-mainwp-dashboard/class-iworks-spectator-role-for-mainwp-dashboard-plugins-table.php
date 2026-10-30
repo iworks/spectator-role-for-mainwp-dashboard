@@ -76,16 +76,11 @@ class iworks_spectator_role_for_mainwp_dashboard_plugins_table extends WP_List_T
 		);
 
 		/**
-		 * Since WordPress 7.x, WP_List_Table::get_column_info() resolves
-		 * columns via get_column_headers() and no longer falls back to
-		 * get_columns() for custom screens. Set them explicitly.
+		 * Columns are not set via $_column_headers: doing so would bypass
+		 * get_hidden_columns() and disable the Screen Options checkboxes.
+		 * They are provided by the "manage_{screen}_columns" filter, which
+		 * the admin class registers on the page load hook.
 		 */
-		$this->_column_headers = array(
-			$this->get_columns(),
-			array(),
-			$this->get_sortable_columns(),
-			'name',
-		);
 	}
 
 	/**
@@ -315,9 +310,9 @@ class iworks_spectator_role_for_mainwp_dashboard_plugins_table extends WP_List_T
 		);
 		foreach ( $this->plugins as $plugin ) {
 			if ( ! empty( $plugin['mu'] ) ) {
-				$counts['mu']++;
+				++$counts['mu'];
 			} else {
-				$counts['regular']++;
+				++$counts['regular'];
 			}
 		}
 
@@ -363,8 +358,8 @@ class iworks_spectator_role_for_mainwp_dashboard_plugins_table extends WP_List_T
 	 * @return string Filter URL.
 	 */
 	private function get_view_url( $key ) {
-		$url   = admin_url( 'admin.php?page=mainwp-custom-plugins-list' );
-		$mu    = $this->get_current_mu();
+		$url    = admin_url( 'admin.php?page=mainwp-custom-plugins-list' );
+		$mu     = $this->get_current_mu();
 		$search = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : '';
 		if ( '' !== $search ) {
 			$url = add_query_arg( 's', $search, $url );
@@ -429,24 +424,30 @@ class iworks_spectator_role_for_mainwp_dashboard_plugins_table extends WP_List_T
 		echo "\xEF\xBB\xBF";
 
 		$handle = fopen( 'php://output', 'w' );
-		fputcsv( $handle, array(
-			__( 'Plugin Name', 'spectator-role-for-mainwp-dashboard' ),
-			__( 'Version', 'spectator-role-for-mainwp-dashboard' ),
-			__( 'Type', 'spectator-role-for-mainwp-dashboard' ),
-			__( 'Site Name', 'spectator-role-for-mainwp-dashboard' ),
-			__( 'URL', 'spectator-role-for-mainwp-dashboard' ),
-		) );
+		fputcsv(
+			$handle,
+			array(
+				__( 'Plugin Name', 'spectator-role-for-mainwp-dashboard' ),
+				__( 'Version', 'spectator-role-for-mainwp-dashboard' ),
+				__( 'Type', 'spectator-role-for-mainwp-dashboard' ),
+				__( 'Site Name', 'spectator-role-for-mainwp-dashboard' ),
+				__( 'URL', 'spectator-role-for-mainwp-dashboard' ),
+			)
+		);
 		foreach ( $plugins as $plugin ) {
 			$type = $this->get_view_label( ! empty( $plugin['mu'] ) ? 'mu' : 'regular' );
 			foreach ( $plugin['versions'] as $version => $data ) {
 				foreach ( $data['sites'] as $site_url ) {
-					fputcsv( $handle, array(
-						$plugin['name'],
-						$version,
-						$type,
-						$plugin['sites'][ $site_url ],
-						$site_url,
-					) );
+					fputcsv(
+						$handle,
+						array(
+							$plugin['name'],
+							$version,
+							$type,
+							$plugin['sites'][ $site_url ],
+							$site_url,
+						)
+					);
 				}
 			}
 		}

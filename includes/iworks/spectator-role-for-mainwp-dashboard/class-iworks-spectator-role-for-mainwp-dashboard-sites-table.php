@@ -74,16 +74,79 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 			)
 		);
 
+		$this->register_icons();
+
 		/**
-		 * Since WordPress 7.x, WP_List_Table::get_column_info() resolves
-		 * columns via get_column_headers() and no longer falls back to
-		 * get_columns() for custom screens. Set them explicitly.
+		 * Columns are not set via $_column_headers: doing so would bypass
+		 * get_hidden_columns() and disable the Screen Options checkboxes.
+		 * They are provided by the "manage_{screen}_columns" filter, which
+		 * the admin class registers on the page load hook.
 		 */
-		$this->_column_headers = array(
-			$this->get_columns(),
-			array(),
-			$this->get_sortable_columns(),
-			'name',
+	}
+
+	/**
+	 * Register custom icons used in the table headers.
+	 *
+	 * @since 1.0.0
+	 * @return void
+	 */
+	private function register_icons() {
+		if ( ! function_exists( 'wp_register_icon_collection' ) ) {
+			return;
+		}
+		wp_register_icon_collection(
+			'spectator-role-for-mainwp-dashboard',
+			array(
+				'label'       => __( 'Spectator Role for MainWP Dashboard', 'spectator-role-for-mainwp-dashboard' ),
+				'description' => __( 'Icons used by the plugin list tables.', 'spectator-role-for-mainwp-dashboard' ),
+				'public'      => false,
+			)
+		);
+		wp_register_icon(
+			'spectator-role-for-mainwp-dashboard/php',
+			array(
+				'label'     => __( 'PHP', 'spectator-role-for-mainwp-dashboard' ),
+				'file_path' => sprintf( '%s/assets/images/icons/php.svg', dirname( __DIR__, 3 ) ),
+			)
+		);
+		wp_register_icon(
+			'spectator-role-for-mainwp-dashboard/database',
+			array(
+				'label'     => __( 'Database', 'spectator-role-for-mainwp-dashboard' ),
+				'file_path' => sprintf( '%s/assets/images/icons/database.svg', dirname( __DIR__, 3 ) ),
+			)
+		);
+	}
+
+	/**
+	 * Get the PHP icon markup for the column header.
+	 *
+	 * @since 1.0.0
+	 * @return string Icon SVG markup, or empty string when the Icons API is unavailable.
+	 */
+	private function get_php_icon() {
+		if ( ! function_exists( 'wp_get_icon' ) ) {
+			return '';
+		}
+		return wp_get_icon(
+			'spectator-role-for-mainwp-dashboard/php',
+			array( 'size' => 20 )
+		);
+	}
+
+	/**
+	 * Get the database icon markup for the column header.
+	 *
+	 * @since 1.0.0
+	 * @return string Icon SVG markup, or empty string when the Icons API is unavailable.
+	 */
+	private function get_db_icon() {
+		if ( ! function_exists( 'wp_get_icon' ) ) {
+			return '';
+		}
+		return wp_get_icon(
+			'spectator-role-for-mainwp-dashboard/database',
+			array( 'size' => 20 )
 		);
 	}
 
@@ -95,9 +158,25 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 	 */
 	public function get_columns() {
 		return array(
-			'name' => __( 'Site Name', 'spectator-role-for-mainwp-dashboard' ),
-			'url'  => __( 'URL', 'spectator-role-for-mainwp-dashboard' ),
-			'tags' => __( 'Tags', 'spectator-role-for-mainwp-dashboard' ),
+			'name'          => __( 'Site Name', 'spectator-role-for-mainwp-dashboard' ),
+			'wp_version'    => sprintf(
+				'<img src="%1$s" width="20" height="20" alt="" title="%2$s" /><span class="screen-reader-text">%3$s</span>',
+				esc_url( admin_url( 'images/wordpress-logo.svg' ) ),
+				esc_attr__( 'WP Version', 'spectator-role-for-mainwp-dashboard' ),
+				__( 'WP Version', 'spectator-role-for-mainwp-dashboard' )
+			),
+			'php_version'   => sprintf(
+				'%1$s<span class="screen-reader-text">%2$s</span>',
+				$this->get_php_icon(),
+				__( 'PHP Version', 'spectator-role-for-mainwp-dashboard' )
+			),
+			'mysql_version' => sprintf(
+				'%1$s<span class="screen-reader-text">%2$s</span>',
+				$this->get_db_icon(),
+				__( 'MySQL Version', 'spectator-role-for-mainwp-dashboard' )
+			),
+			'url'           => __( 'URL', 'spectator-role-for-mainwp-dashboard' ),
+			'tags'          => __( 'Tags', 'spectator-role-for-mainwp-dashboard' ),
 		);
 	}
 
@@ -126,8 +205,6 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 	public function prepare_items() {
 		global $wpdb;
 
-		$table_name = $wpdb->prefix . 'mainwp_wp';
-
 		/**
 		 * Filters - shared with CSV export.
 		 */
@@ -152,7 +229,7 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 		$offset       = ( $current_page - 1 ) * $this->per_page;
 
 		$total_items = (int) $wpdb->get_var(
-			$wpdb->prepare( "SELECT COUNT(*) FROM {$table_name} w{$where_sql}", ...$args )
+			$wpdb->prepare( "SELECT COUNT(*) FROM {$this->get_tables_sql()}{$where_sql}", ...$args )
 		);
 
 		$args[] = $this->per_page;
@@ -160,12 +237,15 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 
 		$this->items = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT w.* FROM {$table_name} w{$where_sql} ORDER BY w.{$orderby} {$order} LIMIT %d OFFSET %d",
+				"SELECT w.*, o.value AS site_info FROM {$this->get_tables_sql()}{$where_sql} ORDER BY w.{$orderby} {$order} LIMIT %d OFFSET %d",
 				...$args
 			)
 		);
 		if ( ! is_array( $this->items ) ) {
 			$this->items = array();
+		}
+		foreach ( $this->items as $item ) {
+			$this->hydrate_site_info( $item );
 		}
 
 		/**
@@ -190,6 +270,46 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 	 */
 	public function get_current_tag_id() {
 		return isset( $_REQUEST['tag'] ) ? absint( $_REQUEST['tag'] ) : 0;
+	}
+
+	/**
+	 * Build the FROM clause for sites queries.
+	 *
+	 * Joins the options table to expose the site_info data with the
+	 * WordPress, PHP, and MySQL versions. Uses a LEFT JOIN so sites
+	 * without the site_info option still appear.
+	 *
+	 * @since 1.0.0
+	 * @return string FROM clause.
+	 */
+	private function get_tables_sql() {
+		global $wpdb;
+
+		return sprintf(
+			"%s w LEFT JOIN %s o ON o.wpid = w.id AND o.name = 'site_info'",
+			$wpdb->prefix . 'mainwp_wp',
+			$wpdb->prefix . 'mainwp_wp_options'
+		);
+	}
+
+	/**
+	 * Decode the site_info JSON into version properties.
+	 *
+	 * Extracts the WordPress, PHP, and MySQL versions from the
+	 * site_info option stored by MainWP.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param object $item Site row with a site_info property.
+	 * @return void
+	 */
+	private function hydrate_site_info( $item ) {
+		$site_info           = json_decode( (string) $item->site_info, true );
+		$is_array            = is_array( $site_info );
+		$item->wp_version    = $is_array && isset( $site_info['wpversion'] ) ? (string) $site_info['wpversion'] : '';
+		$item->php_version   = $is_array && isset( $site_info['phpversion'] ) ? (string) $site_info['phpversion'] : '';
+		$item->mysql_version = $is_array && isset( $site_info['mysql_version'] ) ? (string) $site_info['mysql_version'] : '';
+		unset( $item->site_info );
 	}
 
 	/**
@@ -229,7 +349,7 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 		if ( 0 < $tag_id ) {
 			$where_sql .= ( '' === $where_sql ) ? ' WHERE ' : ' AND ';
 			$where_sql .= "EXISTS ( SELECT 1 FROM {$group_table} wg WHERE wg.wpid = w.id AND wg.groupid = %d ) ";
-			$args[]    = $tag_id;
+			$args[]     = $tag_id;
 		}
 
 		return array( $where_sql, $args );
@@ -244,7 +364,7 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 	 * @return string Export URL.
 	 */
 	public function get_export_url() {
-		$url = admin_url( 'admin.php?page=mainwp-custom-sites-list&action=export_csv' );
+		$url    = admin_url( 'admin.php?page=mainwp-custom-sites-list&action=export_csv' );
 		$tag_id = $this->get_current_tag_id();
 		if ( 0 < $tag_id ) {
 			$url = add_query_arg( 'tag', $tag_id, $url );
@@ -277,18 +397,19 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 
 		global $wpdb;
 
-		$table_name = $wpdb->prefix . 'mainwp_wp';
-
 		list( $where_sql, $args ) = $this->get_filter_sql();
 
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT w.name, w.url FROM {$table_name} w{$where_sql} ORDER BY w.name ASC",
+				"SELECT w.name, w.url, o.value AS site_info FROM {$this->get_tables_sql()}{$where_sql} ORDER BY w.name ASC",
 				...$args
 			)
 		);
 		if ( ! is_array( $rows ) ) {
 			$rows = array();
+		}
+		foreach ( $rows as $row ) {
+			$this->hydrate_site_info( $row );
 		}
 
 		$filename = sprintf( 'mainwp-sites-%s.csv', gmdate( 'Y-m-d' ) );
@@ -301,12 +422,18 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 		echo "\xEF\xBB\xBF";
 
 		$handle = fopen( 'php://output', 'w' );
-		fputcsv( $handle, array(
-			__( 'Site Name', 'spectator-role-for-mainwp-dashboard' ),
-			__( 'URL', 'spectator-role-for-mainwp-dashboard' ),
-		) );
+		fputcsv(
+			$handle,
+			array(
+				__( 'Site Name', 'spectator-role-for-mainwp-dashboard' ),
+				__( 'URL', 'spectator-role-for-mainwp-dashboard' ),
+				__( 'WP Version', 'spectator-role-for-mainwp-dashboard' ),
+				__( 'PHP Version', 'spectator-role-for-mainwp-dashboard' ),
+				__( 'MySQL Version', 'spectator-role-for-mainwp-dashboard' ),
+			)
+		);
 		foreach ( $rows as $row ) {
-			fputcsv( $handle, array( $row->name, $row->url ) );
+			fputcsv( $handle, array( $row->name, $row->url, $row->wp_version, $row->php_version, $row->mysql_version ) );
 		}
 		fclose( $handle );
 		exit;
@@ -444,6 +571,94 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 	 */
 	public function column_name( $item ) {
 		return '<strong>' . esc_html( $item->name ) . '</strong>';
+	}
+
+	/**
+	 * Render a version column cell.
+	 *
+	 * Adds the core "column-comments" class to keep the
+	 * column compact.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $classes CSS classes for the cell.
+	 * @param string $data    Data attributes for the cell.
+	 * @param string $value   Version value.
+	 * @return void
+	 */
+	private function render_version_cell( $classes, $data, $value ) {
+		if ( '' === (string) $value ) {
+			$value = '&mdash;';
+		} else {
+			$value = esc_html( $value );
+		}
+		printf(
+			'<td class="%s" %s>%s</td>',
+			esc_attr( trim( $classes . ' column-comments' ) ),
+			$data,
+			$value
+		);
+	}
+
+	/**
+	 * Render the WP version column cell.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param object $item    Site row.
+	 * @param string $classes CSS classes for the cell.
+	 * @param string $data    Data attributes for the cell.
+	 * @param string $primary Primary column name.
+	 * @return void
+	 */
+	protected function _column_wp_version( $item, $classes, $data, $primary ) {
+		$this->render_version_cell( $classes, $data, isset( $item->wp_version ) ? $item->wp_version : '' );
+	}
+
+	/**
+	 * Render the PHP version column cell.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param object $item    Site row.
+	 * @param string $classes CSS classes for the cell.
+	 * @param string $data    Data attributes for the cell.
+	 * @param string $primary Primary column name.
+	 * @return void
+	 */
+	protected function _column_php_version( $item, $classes, $data, $primary ) {
+		$this->render_version_cell( $classes, $data, isset( $item->php_version ) ? $item->php_version : '' );
+	}
+
+	/**
+	 * Render the MySQL version column cell.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param object $item    Site row.
+	 * @param string $classes CSS classes for the cell.
+	 * @param string $data    Data attributes for the cell.
+	 * @param string $primary Primary column name.
+	 * @return void
+	 */
+	protected function _column_mysql_version( $item, $classes, $data, $primary ) {
+		$this->render_version_cell( $classes, $data, isset( $item->mysql_version ) ? $item->mysql_version : '' );
+	}
+
+	/**
+	 * Print the table header cells.
+	 *
+	 * Adds the core "column-comments" class to the WP version header
+	 * cell to keep the column compact. Core provides no filter for
+	 * per-column header classes, hence the buffered output.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param bool $with_id Whether to set the id attribute or not.
+	 * @return void
+	 */
+	public function print_column_headers( $with_id = true ) {
+		parent::print_column_headers( $with_id );
 	}
 
 	/**

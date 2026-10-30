@@ -88,31 +88,85 @@ class iworks_spectator_role_for_mainwp_dashboard_admin extends iworks_spectator_
 	 * @return void
 	 */
 	public function action_admin_menu_register_admin_menu() {
-			add_menu_page(
-				__( 'Sites', 'spectator-role-for-mainwp-dashboard' ),          // Page title
-				__( 'Sites', 'spectator-role-for-mainwp-dashboard' ),                 // Menu title
-				'read',                            // Capability required
-				'mainwp-custom-sites-list',                  // Menu slug
-				array( $this, 'render_sites_list_page' ),    // Callback method pointing to this instance
-				'dashicons-admin-site',                      // Menu icon
-				30                                           // Position in admin menu
-			);
-			add_submenu_page(
-				'mainwp-custom-sites-list',                  // Parent slug
-				__( 'Plugins', 'spectator-role-for-mainwp-dashboard' ),        // Page title
-				__( 'Plugins', 'spectator-role-for-mainwp-dashboard' ),        // Menu title
-				'read',                  // Capability required
-				'mainwp-custom-plugins-list',                // Menu slug
-				array( $this, 'render_plugins_list_page' ), // Callback method
-			);
-			add_submenu_page(
-				'mainwp-custom-sites-list',                  // Parent slug
-				__( 'Themes', 'spectator-role-for-mainwp-dashboard' ),        // Page title
-				__( 'Themes', 'spectator-role-for-mainwp-dashboard' ),        // Menu title
-				'read',                  // Capability required
-				'mainwp-custom-themes-list',                // Menu slug
-				array( $this, 'render_themes_list_page' ), // Callback method
-			);
+		$page_hook = add_menu_page(
+			__( 'Sites', 'spectator-role-for-mainwp-dashboard' ),      // Page title
+			__( 'Sites', 'spectator-role-for-mainwp-dashboard' ),      // Menu title
+			'read',                                                    // Capability required
+			'mainwp-custom-sites-list',                                // Menu slug
+			array( $this, 'render_sites_list_page' ),                  // Callback method pointing to this instance
+			'dashicons-admin-site',                                    // Menu icon
+			30                                                         // Position in admin menu
+		);
+		add_action( "load-{$page_hook}", array( $this, 'action_load_register_sites_columns' ) );
+		$page_hook = add_submenu_page(
+			'mainwp-custom-sites-list',                                // Parent slug
+			__( 'Plugins', 'spectator-role-for-mainwp-dashboard' ),    // Page title
+			__( 'Plugins', 'spectator-role-for-mainwp-dashboard' ),    // Menu title
+			'read',                                                    // Capability required
+			'mainwp-custom-plugins-list',                              // Menu slug
+			array( $this, 'render_plugins_list_page' )                 // Callback method
+		);
+		add_action( "load-{$page_hook}", array( $this, 'action_load_register_plugins_columns' ) );
+		$page_hook = add_submenu_page(
+			'mainwp-custom-sites-list',                                // Parent slug
+			__( 'Themes', 'spectator-role-for-mainwp-dashboard' ),     // Page title
+			__( 'Themes', 'spectator-role-for-mainwp-dashboard' ),     // Menu title
+			'read',                                                    // Capability required
+			'mainwp-custom-themes-list',                               // Menu slug
+			array( $this, 'render_themes_list_page' )                  // Callback method
+		);
+		add_action( "load-{$page_hook}", array( $this, 'action_load_register_themes_columns' ) );
+	}
+
+	/**
+	 * Register sites list columns on the current screen.
+	 *
+	 * WP_List_Table resolves columns via get_column_headers(), which reads
+	 * the "manage_{screen}_columns" filter. Registering the columns here
+	 * also enables the column checkboxes in the Screen Options tab, so
+	 * users can choose which columns are visible.
+	 *
+	 * @since 1.0.0
+	 * @return void
+	 */
+	public function action_load_register_sites_columns() {
+		$this->register_list_table_columns( new iworks_spectator_role_for_mainwp_dashboard_sites_table() );
+	}
+
+	/**
+	 * Register plugins list columns on the current screen.
+	 *
+	 * @since 1.0.0
+	 * @return void
+	 */
+	public function action_load_register_plugins_columns() {
+		$this->register_list_table_columns( new iworks_spectator_role_for_mainwp_dashboard_plugins_table() );
+	}
+
+	/**
+	 * Register themes list columns on the current screen.
+	 *
+	 * @since 1.0.0
+	 * @return void
+	 */
+	public function action_load_register_themes_columns() {
+		$this->register_list_table_columns( new iworks_spectator_role_for_mainwp_dashboard_themes_table() );
+	}
+
+	/**
+	 * Register list table columns via the "manage_{screen}_columns" filter.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_List_Table $table List table instance.
+	 * @return void
+	 */
+	private function register_list_table_columns( $table ) {
+		$screen = get_current_screen();
+		if ( ! $screen ) {
+			return;
+		}
+		add_filter( "manage_{$screen->id}_columns", array( $table, 'get_columns' ) );
 	}
 
 
@@ -213,5 +267,4 @@ class iworks_spectator_role_for_mainwp_dashboard_admin extends iworks_spectator_
 		echo '</form>';
 		echo '</div>';
 	}
-
 }

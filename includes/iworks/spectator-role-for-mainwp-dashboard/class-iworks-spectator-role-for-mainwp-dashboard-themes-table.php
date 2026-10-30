@@ -76,16 +76,11 @@ class iworks_spectator_role_for_mainwp_dashboard_themes_table extends WP_List_Ta
 		);
 
 		/**
-		 * Since WordPress 7.x, WP_List_Table::get_column_info() resolves
-		 * columns via get_column_headers() and no longer falls back to
-		 * get_columns() for custom screens. Set them explicitly.
+		 * Columns are not set via $_column_headers: doing so would bypass
+		 * get_hidden_columns() and disable the Screen Options checkboxes.
+		 * They are provided by the "manage_{screen}_columns" filter, which
+		 * the admin class registers on the page load hook.
 		 */
-		$this->_column_headers = array(
-			$this->get_columns(),
-			array(),
-			$this->get_sortable_columns(),
-			'name',
-		);
 	}
 
 	/**
@@ -315,9 +310,9 @@ class iworks_spectator_role_for_mainwp_dashboard_themes_table extends WP_List_Ta
 		);
 		foreach ( $this->themes as $theme ) {
 			if ( ! empty( $theme['active'] ) ) {
-				$counts['active']++;
+				++$counts['active'];
 			} else {
-				$counts['inactive']++;
+				++$counts['inactive'];
 			}
 		}
 
@@ -428,24 +423,30 @@ class iworks_spectator_role_for_mainwp_dashboard_themes_table extends WP_List_Ta
 		echo "\xEF\xBB\xBF";
 
 		$handle = fopen( 'php://output', 'w' );
-		fputcsv( $handle, array(
-			__( 'Theme Name', 'spectator-role-for-mainwp-dashboard' ),
-			__( 'Version', 'spectator-role-for-mainwp-dashboard' ),
-			__( 'Type', 'spectator-role-for-mainwp-dashboard' ),
-			__( 'Site Name', 'spectator-role-for-mainwp-dashboard' ),
-			__( 'URL', 'spectator-role-for-mainwp-dashboard' ),
-		) );
+		fputcsv(
+			$handle,
+			array(
+				__( 'Theme Name', 'spectator-role-for-mainwp-dashboard' ),
+				__( 'Version', 'spectator-role-for-mainwp-dashboard' ),
+				__( 'Type', 'spectator-role-for-mainwp-dashboard' ),
+				__( 'Site Name', 'spectator-role-for-mainwp-dashboard' ),
+				__( 'URL', 'spectator-role-for-mainwp-dashboard' ),
+			)
+		);
 		foreach ( $themes as $theme ) {
 			$type = $this->get_view_label( ! empty( $theme['active'] ) ? 'active' : 'inactive' );
 			foreach ( $theme['versions'] as $version => $data ) {
 				foreach ( $data['sites'] as $site_url ) {
-					fputcsv( $handle, array(
-						$theme['name'],
-						$version,
-						$type,
-						$theme['sites'][ $site_url ],
-						$site_url,
-					) );
+					fputcsv(
+						$handle,
+						array(
+							$theme['name'],
+							$version,
+							$type,
+							$theme['sites'][ $site_url ],
+							$site_url,
+						)
+					);
 				}
 			}
 		}
