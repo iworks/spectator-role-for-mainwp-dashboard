@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.1\n"
 "Report-Msgid-Bugs-To: http://iworks.pl\n"
-"POT-Creation-Date: 2026-10-29 07:48:59+00:00\n"
+"POT-Creation-Date: 2026-10-30 09:43:56+00:00\n"
 "PO-Revision-Date: 2026-10-28 13:40+0100\n"
 "Last-Translator: \n"
 "Language-Team: iWorks <support@iworks.pl>\n"
@@ -27,102 +27,159 @@ msgstr ""
 msgid "Spectator (MainWP)"
 msgstr "Obserwator (MainWP)"
 
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:80
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:81
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:186
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:287
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:92
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:93
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-plugins-table.php:102
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-themes-table.php:102
 msgid "Sites"
 msgstr "Witryny"
 
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:90
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:91
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:102
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:103
 msgid "Plugins"
 msgstr "Wtyczki"
 
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:98
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:99
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:110
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:111
 msgid "Themes"
 msgstr "Motywy"
 
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:120
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:134
 msgid "MainWP Child Sites"
 msgstr "Witryny podrzędne MainWP"
 
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:128
-msgid "Search sites"
-msgstr "Szukaj witryny"
-
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:132
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:136
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:169
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:202
 msgid "Export CSV"
 msgstr ""
 
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:179
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:145
+msgid "Search sites"
+msgstr "Szukaj witryny"
+
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:167
 msgid "MainWP Installed Plugins"
 msgstr "Zainstalowane wtyczki MainWP"
 
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:183
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:285
-msgid "Name"
-msgstr "Nazwa"
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:178
+#, fuzzy
+msgid "Search plugins"
+msgstr "Szukaj witryny"
 
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:184
-msgid "MU"
-msgstr "MU"
-
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:185
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:286
-msgid "Versions"
-msgstr "Wersje"
-
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:187
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:288
-msgid "Sites Count"
-msgstr "Liczba witryn"
-
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:196
-msgid "Yes"
-msgstr "Tak"
-
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:205
-msgid "No plugins found."
-msgstr "Brak wtyczek."
-
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:281
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:200
 msgid "MainWP Installed Themes"
 msgstr "Zainstalowane motywy MainWP"
 
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:305
-msgid "No themes found."
-msgstr "Brak motywów."
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-admin.php:211
+#, fuzzy
+msgid "Search themes"
+msgstr "Szukaj witryny"
 
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-sites-table.php:98
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-sites-table.php:303
-msgid "Site Name"
-msgstr "Nazwa witryny"
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-plugins-table.php:99
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-themes-table.php:99
+msgid "Name"
+msgstr "Nazwa"
 
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-sites-table.php:99
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-sites-table.php:304
-msgid "URL"
-msgstr "Adres URL"
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-plugins-table.php:100
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-plugins-table.php:435
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-themes-table.php:100
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-themes-table.php:434
+msgid "Type"
+msgstr ""
 
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-sites-table.php:100
-msgid "Tags"
-msgstr "Tagi"
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-plugins-table.php:101
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-themes-table.php:101
+msgid "Versions"
+msgstr "Wersje"
 
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-sites-table.php:395
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-plugins-table.php:103
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-themes-table.php:103
+msgid "Sites Count"
+msgstr "Liczba witryn"
+
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-plugins-table.php:348
+msgid "Must-Use"
+msgstr ""
+
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-plugins-table.php:350
+msgid "Regular"
+msgstr ""
+
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-plugins-table.php:352
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-sites-table.php:421
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-themes-table.php:352
 msgid "All"
 msgstr "Wszstko"
 
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-sites-table.php:484
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-plugins-table.php:433
+#, fuzzy
+msgid "Plugin Name"
+msgstr "Wtyczki"
+
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-plugins-table.php:434
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-themes-table.php:433
+#, fuzzy
+msgid "Version"
+msgstr "Wersje"
+
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-plugins-table.php:436
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-sites-table.php:98
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-sites-table.php:328
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-themes-table.php:435
+msgid "Site Name"
+msgstr "Nazwa witryny"
+
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-plugins-table.php:437
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-sites-table.php:105
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-sites-table.php:329
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-themes-table.php:436
+msgid "URL"
+msgstr "Adres URL"
+
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-plugins-table.php:564
+msgid "No plugins found."
+msgstr "Brak wtyczek."
+
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-sites-table.php:102
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-sites-table.php:103
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-sites-table.php:330
+#, fuzzy
+msgid "WP Version"
+msgstr "Wersje"
+
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-sites-table.php:106
+msgid "Tags"
+msgstr "Tagi"
+
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-sites-table.php:566
 msgid "Go to Admin"
 msgstr "Przejdź do admina"
 
 #. translators: %s: URL to the MainWP manage sites page.
-#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-sites-table.php:541
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-sites-table.php:623
 msgid "No child sites found. Connect them via <a href=\"%s\">MainWP</a>."
 msgstr ""
 "Nie znaleziono żadnych witryn podrzędnych. Połącz je za pomocą <a "
 "href=\"%s\">MainWP</a>."
+
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-themes-table.php:348
+#, fuzzy
+msgid "Active"
+msgstr "Działania"
+
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-themes-table.php:350
+msgid "Inactive"
+msgstr ""
+
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-themes-table.php:432
+#, fuzzy
+msgid "Theme Name"
+msgstr "Nazwa witryny"
+
+#: includes/iworks/spectator-role-for-mainwp-dashboard/class-iworks-spectator-role-for-mainwp-dashboard-themes-table.php:563
+msgid "No themes found."
+msgstr "Brak motywów."
 
 #. Plugin Name of the plugin/theme
 msgid "Spectator Role for MainWP Dashboard"
@@ -144,5 +201,8 @@ msgstr "Marcin Pietrzak"
 msgid "http://iworks.pl/"
 msgstr "http://iworks.pl/"
 
-#~ msgid "Actions"
-#~ msgstr "Działania"
+#~ msgid "MU"
+#~ msgstr "MU"
+
+#~ msgid "Yes"
+#~ msgstr "Tak"

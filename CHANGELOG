@@ -1,2 +1,11 @@
-## 1.0.0 (Initial Release)
+## 0.0.2 (2026-10-30)
+- Added WordPress, PHP, and MySQL version columns to the Sites list table.
+- Version column headers display icons: the WordPress logo, the PHP logo, and a database icon, registered via the WordPress Icons API (WP 7.1+), with graceful fallback on older versions.
+- Version data is read from the MainWP `site_info` option.
+- Visible columns can now be chosen via Screen Options on the Sites, Plugins, and Themes list tables.
+- CSV export includes the version columns and respects active filters.
+- Version columns use compact styling (like the core comments column).
+- Added SVG icons in `assets/images/icons/` and updated translation files.
+
+## 0.0.1 (Initial Release)
 - Initial release of spectator-role-for-mainwp-dashboard

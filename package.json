@@ -3,7 +3,7 @@
     "title": "Spectator Role for MainWP Dashboard",
     "tagline": "Safe, Read-Only Dashboard Access for Clients & Teams for MainWP Dashboard",
     "description": "Want to show your clients or team members how their websites are performing without worrying about accidental updates or setting changes? MainWP Spectator introduces a dedicated \"Spectator\" role to your self-hosted MainWP Dashboard, giving selected users secure, read-only access.",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "homepage": "http://iworks.pl/iw_plugin/spectator-role-for-mainwp-dashboard/",
     "repository": {
         "type": "git",
