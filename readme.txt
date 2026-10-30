@@ -67,6 +67,12 @@ You can do it on [Support Threads](https://wordpress.org/support/plugin/spectato
 
 Project maintained on GitHub at [iworks/spectator-role-for-mainwp-dashboard](https://github.com/iworks/spectator-role-for-mainwp-dashboard/).
 
+= 0.0.3 - 2026-10-30 =
+
+* Renamed the MySQL version column to "DB Version" (column header and CSV export).
+* CSV export is now available only to logged-in users who can view the list pages.
+* Updated translations.
+
 = 0.0.2 - 2026-10-30 =
 
 * Added WordPress, PHP, and MySQL version columns to the Sites list table.
