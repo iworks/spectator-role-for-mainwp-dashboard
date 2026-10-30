@@ -173,7 +173,7 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 			'mysql_version' => sprintf(
 				'%1$s<span class="screen-reader-text">%2$s</span>',
 				$this->get_db_icon(),
-				__( 'MySQL Version', 'spectator-role-for-mainwp-dashboard' )
+				__( 'DB Version', 'spectator-role-for-mainwp-dashboard' )
 			),
 			'url'           => __( 'URL', 'spectator-role-for-mainwp-dashboard' ),
 			'tags'          => __( 'Tags', 'spectator-role-for-mainwp-dashboard' ),
@@ -429,7 +429,7 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 				__( 'URL', 'spectator-role-for-mainwp-dashboard' ),
 				__( 'WP Version', 'spectator-role-for-mainwp-dashboard' ),
 				__( 'PHP Version', 'spectator-role-for-mainwp-dashboard' ),
-				__( 'MySQL Version', 'spectator-role-for-mainwp-dashboard' ),
+				__( 'DB Version', 'spectator-role-for-mainwp-dashboard' ),
 			)
 		);
 		foreach ( $rows as $row ) {
