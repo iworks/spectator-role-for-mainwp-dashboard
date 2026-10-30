@@ -65,12 +65,17 @@ class iworks_spectator_role_for_mainwp_dashboard_admin extends iworks_spectator_
 	/**
 	 * Handle the CSV export request on admin init.
 	 *
-	 * Delegates to the sites, plugins, and themes list tables.
+	 * Requires a logged-in user with the same capability as the list pages.
+	 * Delegates to the sites, plugins, and themes list tables, each of
+	 * which verifies its own nonce.
 	 *
 	 * @since 1.0.0
 	 * @return void
 	 */
 	public function action_admin_init_maybe_export_csv() {
+		if ( ! current_user_can( 'read' ) ) {
+			return;
+		}
 		$sites_table = new iworks_spectator_role_for_mainwp_dashboard_sites_table();
 		$sites_table->maybe_handle_export_csv();
 		$plugins_table = new iworks_spectator_role_for_mainwp_dashboard_plugins_table();
