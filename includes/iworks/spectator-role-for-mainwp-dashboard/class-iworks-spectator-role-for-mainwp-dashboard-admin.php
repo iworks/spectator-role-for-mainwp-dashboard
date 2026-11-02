@@ -199,6 +199,7 @@ class iworks_spectator_role_for_mainwp_dashboard_admin extends iworks_spectator_
 		echo '<input type="hidden" name="page" value="mainwp-custom-sites-list" />';
 		$tag_id = $sites_table->get_current_tag_id();
 		if ( 0 < $tag_id ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			printf( '<input type="hidden" name="tag" value="%d" />', $tag_id );
 		}
 		$sites_table->search_box( __( 'Search sites', 'spectator-role-for-mainwp-dashboard' ), 'mainwp-custom-sites-list' );

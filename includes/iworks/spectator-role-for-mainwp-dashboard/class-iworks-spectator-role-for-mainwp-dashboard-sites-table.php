@@ -421,6 +421,7 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 		// UTF-8 BOM so Excel displays non-ASCII site names correctly.
 		echo "\xEF\xBB\xBF";
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		$handle = fopen( 'php://output', 'w' );
 		fputcsv(
 			$handle,
@@ -435,6 +436,7 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 		foreach ( $rows as $row ) {
 			fputcsv( $handle, array( $row->name, $row->url, $row->wp_version, $row->php_version, $row->mysql_version ) );
 		}
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 		fclose( $handle );
 		exit;
 	}
@@ -592,6 +594,7 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 		} else {
 			$value = esc_html( $value );
 		}
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		printf(
 			'<td class="%s" %s>%s</td>',
 			esc_attr( trim( $classes . ' column-comments' ) ),

@@ -24,6 +24,7 @@ module.exports = function(grunt) {
 	 */
 	var excludeCopyFiles = [
 		'**',
+		'o',
 		'!**/bitbucket-pipelines.yml',
 		'!contributing.md',
 		'!**/css/less/**',

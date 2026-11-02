@@ -422,6 +422,7 @@ class iworks_spectator_role_for_mainwp_dashboard_themes_table extends WP_List_Ta
 		// UTF-8 BOM so Excel displays non-ASCII names correctly.
 		echo "\xEF\xBB\xBF";
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		$handle = fopen( 'php://output', 'w' );
 		fputcsv(
 			$handle,
@@ -450,6 +451,7 @@ class iworks_spectator_role_for_mainwp_dashboard_themes_table extends WP_List_Ta
 				}
 			}
 		}
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 		fclose( $handle );
 		exit;
 	}
