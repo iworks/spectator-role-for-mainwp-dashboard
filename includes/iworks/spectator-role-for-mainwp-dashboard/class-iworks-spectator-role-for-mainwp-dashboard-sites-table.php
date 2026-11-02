@@ -58,6 +58,38 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 	private array $site_tags = array();
 
 	/**
+	 * Distinct site_info versions, used by the version filters.
+	 *
+	 * Populated once per request by get_distinct_versions().
+	 *
+	 * @since 1.0.0
+	 * @var   array $distinct_versions Map of key (wp_version, php_version, db_version) to sorted array of versions.
+	 */
+	private array $distinct_versions = array();
+
+	/**
+	 * Site counts per version, keyed by "site_info_key|version".
+	 *
+	 * Populated once per request by get_distinct_versions().
+	 *
+	 * @since 1.0.0
+	 * @var   array $version_counts Version counts.
+	 */
+	private array $version_counts = array();
+
+	/**
+	 * Map of filter request keys to site_info JSON keys.
+	 *
+	 * @since 1.0.0
+	 * @var   array $version_filters Filter key => site_info key.
+	 */
+	private array $version_filters = array(
+		'wp_version'  => 'wpversion',
+		'php_version' => 'phpversion',
+		'db_version'  => 'mysql_version',
+	);
+
+	/**
 	 * Constructor.
 	 *
 	 * Configures the list table as a non-AJAX table with singular/plural labels.
@@ -273,6 +305,166 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 	}
 
 	/**
+	 * Get the active version filters.
+	 *
+	 * Reads the wp_version, php_version, and db_version request parameters,
+	 * keeping only values that actually exist in the stored site_info data.
+	 *
+	 * @since 1.0.0
+	 * @return array Map of filter key to whitelisted version string.
+	 */
+	public function get_current_version_filters() {
+		$available = $this->get_distinct_versions();
+		$filters   = array();
+		foreach ( array_keys( $this->version_filters ) as $filter_key ) {
+			if ( ! isset( $_REQUEST[ $filter_key ] ) ) {
+				continue;
+			}
+			$value = sanitize_text_field( wp_unslash( $_REQUEST[ $filter_key ] ) );
+			if ( '' !== $value && in_array( $value, $available[ $filter_key ], true ) ) {
+				$filters[ $filter_key ] = $value;
+			}
+		}
+		return $filters;
+	}
+
+	/**
+	 * Collect distinct WordPress, PHP, and DB versions from the site_info data.
+	 *
+	 * Reads every site_info option once and decodes the JSON to build the
+	 * version lists shown in the filter dropdowns and to whitelist the
+	 * accepted filter values.
+	 *
+	 * @since 1.0.0
+	 * @return array Map of filter key to sorted, unique array of versions.
+	 */
+	private function get_distinct_versions() {
+		if ( array() !== $this->distinct_versions ) {
+			return $this->distinct_versions;
+		}
+		global $wpdb;
+
+		$versions = array();
+		foreach ( array_keys( $this->version_filters ) as $filter_key ) {
+			$versions[ $filter_key ] = array();
+		}
+
+		$options_table = $wpdb->prefix . 'mainwp_wp_options';
+		$values        = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT value FROM {$options_table} WHERE name = %s",
+				'site_info'
+			)
+		);
+		foreach ( (array) $values as $value ) {
+			$site_info = json_decode( (string) $value, true );
+			if ( ! is_array( $site_info ) ) {
+				continue;
+			}
+			foreach ( $this->version_filters as $filter_key => $info_key ) {
+				if ( ! isset( $site_info[ $info_key ] ) ) {
+					continue;
+				}
+				$version = trim( (string) $site_info[ $info_key ] );
+				if ( '' === $version ) {
+					continue;
+				}
+				$versions[ $filter_key ][]          = $version;
+				$count_key                          = $info_key . '|' . $version;
+				$this->version_counts[ $count_key ] = ( $this->version_counts[ $count_key ] ?? 0 ) + 1;
+			}
+		}
+
+		foreach ( $versions as $filter_key => $list ) {
+			$this->distinct_versions[ $filter_key ] = array_values( array_unique( $list ) );
+			sort( $this->distinct_versions[ $filter_key ], SORT_NATURAL );
+		}
+		return $this->distinct_versions;
+	}
+
+	/**
+	 * Render the version filter dropdowns above the table.
+	 *
+	 * Adds WordPress, PHP, and DB version selects to the standard filter
+	 * actions area, with a "Filter" submit button and a "Clear filters"
+	 * link when any filter is active.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $which 'top' or 'bottom' table navigation position.
+	 * @return void
+	 */
+	protected function extra_tablenav( $which ) {
+		if ( 'top' !== $which ) {
+			return;
+		}
+		$available = $this->get_distinct_versions();
+		$labels    = array(
+			'wp_version'  => __( 'WP version', 'spectator-role-for-mainwp-dashboard' ),
+			'php_version' => __( 'PHP version', 'spectator-role-for-mainwp-dashboard' ),
+			'db_version'  => __( 'DB version', 'spectator-role-for-mainwp-dashboard' ),
+		);
+		$active    = $this->get_current_version_filters();
+		?>
+		<div class="alignleft actions">
+			<?php foreach ( $this->version_filters as $filter_key => $info_key ) : ?>
+				<?php if ( empty( $available[ $filter_key ] ) ) : ?>
+					<input type="hidden" name="<?php echo esc_attr( $filter_key ); ?>" value="" />
+					<?php continue; ?>
+				<?php endif; ?>
+				<select name="<?php echo esc_attr( $filter_key ); ?>">
+					<option value=""><?php echo esc_html( $labels[ $filter_key ] ); ?></option>
+					<?php foreach ( $available[ $filter_key ] as $version ) : ?>
+						<option value="<?php echo esc_attr( $version ); ?>"<?php selected( isset( $active[ $filter_key ] ) && $active[ $filter_key ] === $version ); ?>>
+							<?php
+							printf(
+								/* translators: 1: version, 2: site count. */
+								esc_html__( '%1$s (%2$d)', 'spectator-role-for-mainwp-dashboard' ),
+								esc_html( $version ),
+								(int) $this->count_sites_with_version( $info_key, $version )
+							);
+							?>
+						</option>
+					<?php endforeach; ?>
+				</select>
+			<?php endforeach; ?>
+			<?php submit_button( __( 'Filter', 'spectator-role-for-mainwp-dashboard' ), 'button', 'filter_action', false ); ?>
+			<?php if ( array() !== $active ) : ?>
+				<a href="<?php echo esc_url( $this->get_clear_filters_url() ); ?>"><?php esc_html_e( 'Clear filters', 'spectator-role-for-mainwp-dashboard' ); ?></a>
+			<?php endif; ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Count the sites reporting a given version.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $info_key site_info key (wpversion, phpversion, mysql_version).
+	 * @param string $version  Version string.
+	 * @return int Number of sites.
+	 */
+	private function count_sites_with_version( $info_key, $version ) {
+		$this->get_distinct_versions();
+		return (int) ( $this->version_counts[ $info_key . '|' . $version ] ?? 0 );
+	}
+
+	/**
+	 * Build the URL that resets the version filters.
+	 *
+	 * Preserves the search term, tag filter, and sorting.
+	 *
+	 * @since 1.0.0
+	 * @return string Clear-filters URL.
+	 */
+	private function get_clear_filters_url() {
+		$url = admin_url( 'admin.php?page=mainwp-custom-sites-list' );
+		$url = $this->add_context_query_args( $url );
+		return $url;
+	}
+
+	/**
 	 * Build the FROM clause for sites queries.
 	 *
 	 * Joins the options table to expose the site_info data with the
@@ -352,7 +544,50 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 			$args[]     = $tag_id;
 		}
 
+		/**
+		 * Version filters - matched against the site_info JSON stored in
+		 * the joined options table. Values are whitelisted against the
+		 * distinct versions actually present in the data.
+		 */
+		$filters = $this->get_current_version_filters();
+		foreach ( $filters as $filter_key => $version ) {
+			$info_key   = $this->version_filters[ $filter_key ];
+			$fragment   = sprintf( '"%s":"%s"', $info_key, $wpdb->esc_like( $version ) );
+			$where_sql .= ( '' === $where_sql ) ? ' WHERE ' : ' AND ';
+			$where_sql .= 'o.value LIKE %s ';
+			$args[]     = '%' . $fragment . '%';
+		}
+
 		return array( $where_sql, $args );
+	}
+
+	/**
+	 * Add the current search, tag, sorting, and version filter params to a URL.
+	 *
+	 * Keeps other filters intact when building view, clear, and export URLs.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $url Base URL.
+	 * @return string URL with context query args.
+	 */
+	private function add_context_query_args( $url ) {
+		$search = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : '';
+		if ( '' !== $search ) {
+			$url = add_query_arg( 's', $search, $url );
+		}
+		foreach ( array( 'orderby', 'order' ) as $param ) {
+			if ( isset( $_REQUEST[ $param ] ) ) {
+				$value = sanitize_key( wp_unslash( $_REQUEST[ $param ] ) );
+				if ( '' !== $value ) {
+					$url = add_query_arg( $param, $value, $url );
+				}
+			}
+		}
+		foreach ( $this->get_current_version_filters() as $filter_key => $version ) {
+			$url = add_query_arg( $filter_key, $version, $url );
+		}
+		return $url;
 	}
 
 	/**
@@ -369,10 +604,7 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 		if ( 0 < $tag_id ) {
 			$url = add_query_arg( 'tag', $tag_id, $url );
 		}
-		$search = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : '';
-		if ( '' !== $search ) {
-			$url = add_query_arg( 's', $search, $url );
-		}
+		$url = $this->add_context_query_args( $url );
 		return wp_nonce_url( $url, 'iworks_export_sites_csv' );
 	}
 
@@ -518,6 +750,7 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 		 * All sites.
 		 */
 		$all_url = '' !== $search ? add_query_arg( 's', $search, $base_url ) : $base_url;
+		$all_url = $this->add_context_query_args( $all_url );
 		$views   = array(
 			'all' => sprintf(
 				'<a href="%s"%s>%s <span class="count">(%d)</span></a>',
@@ -555,11 +788,8 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 	 * @return string Filter URL.
 	 */
 	private function get_tag_url( $tag_id ) {
-		$url    = admin_url( 'admin.php?page=mainwp-custom-sites-list' );
-		$search = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : '';
-		if ( '' !== $search ) {
-			$url = add_query_arg( 's', $search, $url );
-		}
+		$url = admin_url( 'admin.php?page=mainwp-custom-sites-list' );
+		$url = $this->add_context_query_args( $url );
 		return add_query_arg( 'tag', $tag_id, $url );
 	}
 
