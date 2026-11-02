@@ -201,9 +201,9 @@ class iworks_spectator_role_for_mainwp_dashboard_base {
 		// Plugin includes directory.
 		$this->includes_directory = __DIR__ . '/spectator-role-for-mainwp-dashboard';
 		/**
-		 * ROle name filter
+		 * Role name filter
 		 */
-		$this->spectator_role_name = apply_filters( 'iworks/spectator_role_for_mainwp_dashboard/role_name', $this->spectator_role_name );
+		$this->spectator_role_name = apply_filters( 'iworks/spectator-role-for-mainwp-dashboard/role_name', $this->spectator_role_name );
 		// WordPress Hooks.
 	}
 

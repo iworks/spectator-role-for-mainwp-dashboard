@@ -127,8 +127,13 @@ class iworks_spectator_role_for_mainwp_dashboard_plugins_table extends WP_List_T
 			return;
 		}
 
-		$table_name   = $wpdb->prefix . 'mainwp_wp';
-		$plugins_data = $wpdb->get_results( "SELECT name, url, plugins FROM {$table_name}" );
+		$table_name = $wpdb->prefix . 'mainwp_wp';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$plugins_data = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT name, url, plugins FROM {$table_name}"
+			)
+		);
 		$plugins      = array();
 
 		foreach ( $plugins_data as $plugin_data ) {

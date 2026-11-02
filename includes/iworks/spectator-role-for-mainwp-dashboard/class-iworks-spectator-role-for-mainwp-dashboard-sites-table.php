@@ -260,6 +260,7 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 		$current_page = max( 1, $this->get_pagenum() );
 		$offset       = ( $current_page - 1 ) * $this->per_page;
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$total_items = (int) $wpdb->get_var(
 			$wpdb->prepare( "SELECT COUNT(*) FROM {$this->get_tables_sql()}{$where_sql}", ...$args )
 		);
@@ -267,6 +268,7 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 		$args[] = $this->per_page;
 		$args[] = $offset;
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$this->items = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT w.*, o.value AS site_info FROM {$this->get_tables_sql()}{$where_sql} ORDER BY w.{$orderby} {$order} LIMIT %d OFFSET %d",
@@ -350,7 +352,8 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 		}
 
 		$options_table = $wpdb->prefix . 'mainwp_wp_options';
-		$values        = $wpdb->get_col(
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$values = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT value FROM {$options_table} WHERE name = %s",
 				'site_info'
@@ -631,6 +634,7 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 
 		list( $where_sql, $args ) = $this->get_filter_sql();
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT w.name, w.url, o.value AS site_info FROM {$this->get_tables_sql()}{$where_sql} ORDER BY w.name ASC",
@@ -684,6 +688,7 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 	private function get_tags_with_counts() {
 		global $wpdb;
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		return (array) $wpdb->get_results(
 			"SELECT g.id, g.name, COUNT( wg.wpid ) AS num
 			FROM {$wpdb->prefix}mainwp_group g
@@ -711,6 +716,7 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 			$ids[] = (int) $item->id;
 		}
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$rows = (array) $wpdb->get_results(
 			$wpdb->prepare(
 				sprintf(
@@ -828,7 +834,9 @@ class iworks_spectator_role_for_mainwp_dashboard_sites_table extends WP_List_Tab
 		printf(
 			'<td class="%s" %s>%s</td>',
 			esc_attr( trim( $classes . ' column-comments' ) ),
+			// data is already escaped in WP_List_Table class
 			$data,
+			// value is already escaped in the calling method
 			$value
 		);
 	}

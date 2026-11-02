@@ -127,7 +127,8 @@ class iworks_spectator_role_for_mainwp_dashboard_themes_table extends WP_List_Ta
 			return;
 		}
 
-		$table_name  = $wpdb->prefix . 'mainwp_wp';
+		$table_name = $wpdb->prefix . 'mainwp_wp';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$themes_data = $wpdb->get_results( "SELECT name, url, themes FROM {$table_name}" );
 		$themes      = array();
 
