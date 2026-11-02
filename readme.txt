@@ -67,6 +67,11 @@ You can do it on [Support Threads](https://wordpress.org/support/plugin/spectato
 
 Project maintained on GitHub at [iworks/spectator-role-for-mainwp-dashboard](https://github.com/iworks/spectator-role-for-mainwp-dashboard/).
 
+= 0.0.4 - 2026-11-02 =
+
+* Added WordPress, PHP, and DB version filter dropdowns to the Sites list table, with a Filter button and a "Clear filters" link.
+* Version filters are preserved when searching, switching tags, sorting, and exporting CSV.
+
 = 0.0.3 - 2026-10-30 =
 
 * Renamed the MySQL version column to "DB Version" (column header and CSV export).
